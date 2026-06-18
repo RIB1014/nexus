@@ -5,10 +5,12 @@ import { getEnabledModuleIds } from "@/lib/data/user";
 import { getModule } from "@/lib/modules/registry";
 import { getIntegration } from "@/lib/integrations/registry";
 import { MODULE_CATEGORY_LABELS } from "@/types/module";
+import { hexToRgbChannels } from "@/lib/theme/presets";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 interface PageProps {
   params: Promise<{ moduleSlug: string }>;
@@ -39,8 +41,16 @@ export default async function ModulePage({ params }: PageProps) {
     ? getIntegration(missingIntegration)
     : undefined;
 
+  // A module can override the accent for its own page (e.g. Practice Log violet).
+  const accentStyle: CSSProperties | undefined = mod.color
+    ? ({
+        "--color-accent": mod.color,
+        "--color-accent-rgb": hexToRgbChannels(mod.color),
+      } as CSSProperties)
+    : undefined;
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6" style={accentStyle}>
       <header className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <div

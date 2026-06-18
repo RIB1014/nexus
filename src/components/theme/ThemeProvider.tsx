@@ -18,12 +18,19 @@ function AppearanceTokens() {
   const accentColor = useAppStore((s) => s.accentColor);
   const radius = useAppStore((s) => s.radius);
   const fontScale = useAppStore((s) => s.fontScale);
+  const bgColor = useAppStore((s) => s.bgColor);
 
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty("--color-accent", accentColor);
     root.style.setProperty("--color-accent-rgb", hexToRgbChannels(accentColor));
   }, [accentColor]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (bgColor) root.style.setProperty("--color-bg-primary", bgColor);
+    else root.style.removeProperty("--color-bg-primary");
+  }, [bgColor]);
 
   useEffect(() => {
     const root = document.documentElement;

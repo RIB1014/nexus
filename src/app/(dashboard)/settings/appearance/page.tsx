@@ -45,11 +45,13 @@ export default function AppearanceSettings() {
     customAccent,
     radius,
     fontScale,
+    bgColor,
     sidebarShowLabels,
     setPreset,
     setCustomAccent,
     setRadius,
     setFontScale,
+    setBgColor,
     setSidebarShowLabels,
   } = useAppStore();
 
@@ -145,6 +147,29 @@ export default function AppearanceSettings() {
               </button>
             );
           })}
+        </div>
+      </Section>
+
+      <Section
+        title="Custom background"
+        description="Override the page background with your own color."
+      >
+        <div className="flex items-center gap-3">
+          <Switch
+            id="custom-bg"
+            checked={bgColor !== null}
+            onCheckedChange={(v) => setBgColor(v ? (bgColor ?? "#0b0b0e") : null)}
+          />
+          <Label htmlFor="custom-bg">Use a custom background</Label>
+          {bgColor !== null && (
+            <input
+              type="color"
+              aria-label="Background color"
+              value={bgColor}
+              onChange={(e) => setBgColor(e.target.value)}
+              className="ml-2 size-9 cursor-pointer rounded-md border border-line bg-transparent"
+            />
+          )}
         </div>
       </Section>
 

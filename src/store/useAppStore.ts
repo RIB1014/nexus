@@ -17,6 +17,7 @@ interface AppState {
   customAccent: string; // last custom hex the user picked
   radius: RadiusScale;
   fontScale: FontScale;
+  bgColor: string | null; // custom page background override (null = preset)
 
   // Layout
   sidebarCollapsed: boolean;
@@ -26,6 +27,7 @@ interface AppState {
   setCustomAccent: (hex: string) => void;
   setRadius: (r: RadiusScale) => void;
   setFontScale: (f: FontScale) => void;
+  setBgColor: (hex: string | null) => void;
   toggleSidebar: () => void;
   setSidebarCollapsed: (v: boolean) => void;
   setSidebarShowLabels: (v: boolean) => void;
@@ -39,6 +41,7 @@ export const useAppStore = create<AppState>()(
       customAccent: DEFAULT_ACCENT,
       radius: "default",
       fontScale: "default",
+      bgColor: null,
 
       sidebarCollapsed: false,
       sidebarShowLabels: true,
@@ -48,6 +51,7 @@ export const useAppStore = create<AppState>()(
         set({ presetId: "custom", accentColor: hex, customAccent: hex }),
       setRadius: (radius) => set({ radius }),
       setFontScale: (fontScale) => set({ fontScale }),
+      setBgColor: (bgColor) => set({ bgColor }),
       toggleSidebar: () =>
         set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),

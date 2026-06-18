@@ -10,6 +10,7 @@ import {
   Moon,
   Plug,
   ArrowRight,
+  Plus,
 } from "lucide-react";
 import { useUIStore } from "@/store/useUIStore";
 import { MODULE_MAP } from "@/lib/modules/registry";
@@ -64,6 +65,30 @@ export function CommandPalette({ enabledModuleIds }: CommandPaletteProps) {
             <Command.Empty className="px-3 py-6 text-center text-small text-muted">
               No results. Try a module name or “settings”.
             </Command.Empty>
+
+            <Command.Group
+              heading="Create"
+              className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1 [&_[cmdk-group-heading]]:text-micro [&_[cmdk-group-heading]]:text-faint"
+            >
+              {enabledModuleIds.includes("tasks") && (
+                <Item
+                  onSelect={() => go("/tasks")}
+                  icon={<Plus className="size-4" />}
+                  keywords={["new", "todo", "add"]}
+                >
+                  New task
+                </Item>
+              )}
+              {enabledModuleIds.includes("notes") && (
+                <Item
+                  onSelect={() => go("/notes")}
+                  icon={<Plus className="size-4" />}
+                  keywords={["new", "note", "page"]}
+                >
+                  New note
+                </Item>
+              )}
+            </Command.Group>
 
             <Command.Group
               heading="Navigation"
