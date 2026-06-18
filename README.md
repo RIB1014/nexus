@@ -121,16 +121,35 @@ prisma/
 
 ## Build status
 
-This repository delivers the **foundation** of Nexus end-to-end:
+**Foundation** — complete:
 
 - ✅ Scaffolding, Tailwind + CSS token system, ThemeProvider
 - ✅ Auth (email/password + Microsoft OAuth stub)
 - ✅ Prisma schema + seed (demo user + sample data)
 - ✅ App shell: sidebar, top bar, mobile nav, command palette
-- ✅ Settings: working Appearance switcher, Modules toggles, Integrations UI
+- ✅ Settings: Appearance (theme/accent/custom bg/radius/font), Modules
+  (toggle + drag-reorder), Integrations UI, Profile
 - ✅ Onboarding wizard (3 steps)
 - ✅ Home dashboard with drag-and-drop widget grid + warm empty states
 
-Individual module experiences (Tasks, Calendar, Notes, Practice Log, …) render a
-scaffolded placeholder and are built out in subsequent deliverables; their data
-models, API guards, and dashboard widgets are already in place.
+**Modules** — fully functional:
+
+- ✅ Tasks — list / board / calendar views, natural-language quick-add, lists +
+  smart lists, subtasks, tags, priorities, optimistic updates
+- ✅ Calendar — month + week views, events + task-due layer, click-to-create
+- ✅ Notes — page tree, Tiptap block editor, autosave, search
+- ✅ Habits — check-ins, streaks, GitHub-style heatmap, weekly ring
+- ✅ Practice Log — sessions (timer), repertoire tracker, stats + heatmap
+- ✅ Athletics — workout logging, weekly volume, PRs, type distribution
+- ✅ Mood & Wellness — daily check-in, mood/energy trends, gratitude log
+- ✅ Cycle Tracker — period + symptom logging, predicted cycle, phase insight
+- ✅ Finance — expenses/income, per-category budgets, monthly summary
+- ✅ Links — save with OpenGraph scrape, collections, search
+
+**Pending** (require external OAuth credentials):
+
+- ⏳ Academic Hub — needs a Canvas OAuth app
+- ⏳ Email Inbox — needs a Microsoft / Outlook OAuth app
+
+Every module is scoped per-user, Zod-validated, and built on the module
+registry — see [CONTRIBUTING.md](CONTRIBUTING.md).
