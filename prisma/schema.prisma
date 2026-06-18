@@ -1,0 +1,396 @@
+// Nexus — Prisma schema.
+// Postgres datasource. All user-owned data is scoped by userId; every query in
+// the app layer must filter on the authenticated session's userId (row-level
+// security enforced at the query layer — see src/lib/db/guard.ts).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth (NextAuth v5 / @auth/prisma-adapter)
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  // `image` is required by the Auth.js Prisma adapter; `avatarUrl` mirrors the
+  // spec naming and is used for app-managed uploads.
+  image         String?
+  avatarUrl     String?
+  emailVerified DateTime?
+  passwordHash  String? // null for OAuth-only accounts
+  timezone      String    @default("America/New_York")
+  weekStartsOn  Int       @default(0) // 0 = Sunday, 1 = Monday
+  onboarded     Boolean   @default(false)
+  identityTags  String[] // e.g. ['student','musician','athlete']
+  createdAt     DateTime  @default(now())
+
+  preferences     Json @default("{}") // theme, layout, fonts, instruments
+  dashboardLayout Json @default("{}") // widget positions / pinned widgets
+
+  accounts         Account[]
+  sessions         Session[]
+  modules          UserModule[]
+  integrations     Integration[]
+  tasks            Task[]
+  taskLists        TaskList[]
+  taskTags         TaskTag[]
+  notes            Note[]
+  practiceSessions PracticeSession[]
+  repertoire       RepertoireItem[]
+  workouts         Workout[]
+  habits           Habit[]
+  habitLogs        HabitLog[]
+  cycleEntries     CycleEntry[]
+  wellnessLogs     WellnessLog[]
+  calendarEvents   CalendarEvent[]
+  expenses         Expense[]
+  budgets          Budget[]
+  links            Link[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Modules & integrations
+// ---------------------------------------------------------------------------
+
+model UserModule {
+  id       String  @id @default(cuid())
+  userId   String
+  moduleId String // e.g. 'tasks', 'practice-log'
+  enabled  Boolean @default(true)
+  order    Int     @default(0)
+  settings Json?
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, moduleId])
+}
+
+model Integration {
+  id           String    @id @default(cuid())
+  userId       String
+  provider     String // 'canvas', 'outlook', ...
+  accessToken  String // encrypted at rest (AES-256-GCM)
+  refreshToken String? // encrypted at rest
+  expiresAt    DateTime?
+  metadata     Json? // e.g. { canvasBaseUrl, accountEmail, scopes }
+  lastSyncedAt DateTime?
+  status       String    @default("connected") // connected | disconnected | error
+  errorMessage String?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+}
+
+// ---------------------------------------------------------------------------
+// Tasks
+// ---------------------------------------------------------------------------
+
+model Task {
+  id           String    @id @default(cuid())
+  userId       String
+  listId       String?
+  title        String
+  notes        String?
+  dueDate      DateTime?
+  dueTime      String?
+  priority     String    @default("none") // none | low | medium | high | urgent
+  completed    Boolean   @default(false)
+  completedAt  DateTime?
+  flagged      Boolean   @default(false)
+  parentId     String?
+  estimatedMin Int?
+  recurrence   String? // rrule string
+  status       String    @default("todo") // todo | in_progress | done (kanban)
+  sourceType   String? // 'canvas' | 'outlook' | 'manual'
+  sourceId     String?
+  order        Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  subtasks Task[]    @relation("TaskSubtasks")
+  parent   Task?     @relation("TaskSubtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  list     TaskList? @relation(fields: [listId], references: [id], onDelete: SetNull)
+  tags     TaskTag[] @relation("TaskTags")
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, listId])
+  @@index([userId, completed])
+}
+
+model TaskList {
+  id          String  @id @default(cuid())
+  userId      String
+  name        String
+  color       String  @default("#6366F1")
+  icon        String?
+  isSmartList Boolean @default(false)
+  order       Int     @default(0)
+  tasks       Task[]
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TaskTag {
+  id     String @id @default(cuid())
+  userId String
+  name   String
+  color  String @default("#6366F1")
+  tasks  Task[] @relation("TaskTags")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+}
+
+// ---------------------------------------------------------------------------
+// Notes
+// ---------------------------------------------------------------------------
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String   @default("Untitled")
+  content   Json     @default("{}") // Tiptap JSON
+  emoji     String?
+  tags      String[]
+  parentId  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  children Note[] @relation("NoteChildren")
+  parent   Note?  @relation("NoteChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Practice log
+// ---------------------------------------------------------------------------
+
+model PracticeSession {
+  id            String   @id @default(cuid())
+  userId        String
+  instrument    String
+  durationMin   Int
+  date          DateTime
+  pieces        Json     @default("[]") // [{ name, sections, notes }]
+  goals         String?
+  reflections   String?
+  qualityRating Int?
+  bpmRange      String?
+  tags          String[]
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+model RepertoireItem {
+  id            String    @id @default(cuid())
+  userId        String
+  title         String
+  composer      String?
+  instrument    String?
+  status        String    @default("learning") // learning | polishing | performance-ready | archived
+  lastPracticed DateTime?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Athletics
+// ---------------------------------------------------------------------------
+
+model Workout {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String // Strength | Cardio | Sport Practice | Recovery | Flexibility | Other
+  durationMin Int
+  startTime   DateTime
+  exercises   Json     @default("[]")
+  rpe         Int?
+  notes       String?
+  bodyWeight  Float?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startTime])
+}
+
+// ---------------------------------------------------------------------------
+// Habits
+// ---------------------------------------------------------------------------
+
+model Habit {
+  id           String     @id @default(cuid())
+  userId       String
+  name         String
+  emoji        String?
+  frequency    String     @default("daily") // daily | weekdays | custom
+  customDays   Int[]
+  category     String?
+  targetStreak Int        @default(0)
+  color        String?
+  order        Int        @default(0)
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  logs         HabitLog[]
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model HabitLog {
+  id        String   @id @default(cuid())
+  habitId   String
+  userId    String
+  date      DateTime
+  completed Boolean  @default(false)
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+}
+
+// ---------------------------------------------------------------------------
+// Wellness & cycle (sensitive — excluded from analytics/aggregation)
+// ---------------------------------------------------------------------------
+
+model WellnessLog {
+  id            String   @id @default(cuid())
+  userId        String
+  date          DateTime
+  moodScore     Int? // 1-10
+  energyScore   Int? // 1-10
+  sleepHours    Float?
+  feelingTag    String?
+  journalEntry  String?
+  gratitude     String[]
+  sensitiveData Boolean  @default(true)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model CycleEntry {
+  id            String   @id @default(cuid())
+  userId        String
+  date          DateTime
+  periodDay     Boolean  @default(false)
+  flowIntensity String? // light | medium | heavy | spotting
+  symptoms      String[]
+  mood          Int?
+  energy        Int?
+  libido        Int?
+  notes         String?
+  sensitiveData Boolean  @default(true)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+// ---------------------------------------------------------------------------
+// Calendar
+// ---------------------------------------------------------------------------
+
+model CalendarEvent {
+  id         String   @id @default(cuid())
+  userId     String
+  title      String
+  start      DateTime
+  end        DateTime
+  allDay     Boolean  @default(false)
+  location   String?
+  notes      String?
+  color      String?
+  sourceType String? // manual | outlook | canvas
+  sourceId   String?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, start])
+}
+
+// ---------------------------------------------------------------------------
+// Finance
+// ---------------------------------------------------------------------------
+
+model Expense {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Float
+  type      String   @default("expense") // expense | income
+  category  String
+  merchant  String?
+  date      DateTime
+  note      String?
+  recurring Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+model Budget {
+  id       String @id @default(cuid())
+  userId   String
+  category String
+  limit    Float
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+}
+
+// ---------------------------------------------------------------------------
+// Links & resources
+// ---------------------------------------------------------------------------
+
+model Link {
+  id          String   @id @default(cuid())
+  userId      String
+  url         String
+  title       String?
+  description String?
+  imageUrl    String?
+  collection  String?
+  tags        String[]
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
