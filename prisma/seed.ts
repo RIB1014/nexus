@@ -11,8 +11,12 @@ const ENABLED_MODULES = [
   "calendar",
   "notes",
   "practice-log",
+  "athletics",
   "habits",
   "wellness",
+  "cycle",
+  "finance",
+  "links",
 ];
 
 function daysAgo(n: number): Date {
@@ -247,6 +251,89 @@ async function main() {
       { userId: user.id, title: "History lecture", start: daysFromNow(2), end: daysFromNow(2), location: "Lecture Hall B", sourceType: "manual", color: "#6366F1" },
     ],
   });
+
+  // --- Athletics -----------------------------------------------------------
+  const workoutData = [
+    { type: "Strength", durationMin: 55, exercises: [
+      { name: "Bench press", sets: 4, reps: 8, weight: 135 },
+      { name: "Squat", sets: 4, reps: 6, weight: 185 },
+      { name: "Pull-ups", sets: 3, reps: 10 },
+    ], rpe: 7 },
+    { type: "Cardio", durationMin: 35, exercises: [{ name: "Run", distanceKm: 5.2 }], rpe: 6 },
+    { type: "Strength", durationMin: 50, exercises: [
+      { name: "Deadlift", sets: 3, reps: 5, weight: 225 },
+      { name: "Overhead press", sets: 4, reps: 8, weight: 95 },
+    ], rpe: 8 },
+    { type: "Recovery", durationMin: 25, exercises: [{ name: "Mobility flow" }], rpe: 3 },
+  ];
+  for (let i = 0; i < workoutData.length; i++) {
+    const w = workoutData[i];
+    await prisma.workout.create({
+      data: {
+        userId: user.id,
+        type: w.type,
+        durationMin: w.durationMin,
+        startTime: daysAgo(i * 2),
+        exercises: w.exercises,
+        rpe: w.rpe,
+        bodyWeight: 165 + (i % 2),
+      },
+    });
+  }
+
+  // --- Finance -------------------------------------------------------------
+  await prisma.budget.createMany({
+    data: [
+      { userId: user.id, category: "Food", limit: 300 },
+      { userId: user.id, category: "Transport", limit: 80 },
+      { userId: user.id, category: "Subscriptions", limit: 50 },
+    ],
+  });
+  const txns = [
+    { amount: 2400, type: "income", category: "Income", merchant: "Part-time job", note: "Paycheck" },
+    { amount: 12.5, type: "expense", category: "Food", merchant: "Campus café" },
+    { amount: 64.3, type: "expense", category: "Groceries", merchant: "Trader Joe's" },
+    { amount: 9.99, type: "expense", category: "Subscriptions", merchant: "Spotify", recurring: true },
+    { amount: 38, type: "expense", category: "Transport", merchant: "Metro card" },
+    { amount: 24.5, type: "expense", category: "Entertainment", merchant: "Cinema" },
+    { amount: 45, type: "expense", category: "Food", merchant: "Dinner out" },
+  ];
+  for (let i = 0; i < txns.length; i++) {
+    const t = txns[i];
+    await prisma.expense.create({
+      data: {
+        userId: user.id,
+        amount: t.amount,
+        type: t.type,
+        category: t.category,
+        merchant: t.merchant,
+        date: daysAgo(i),
+        recurring: t.recurring ?? false,
+      },
+    });
+  }
+
+  // --- Links ---------------------------------------------------------------
+  await prisma.link.createMany({
+    data: [
+      { userId: user.id, url: "https://www.imslp.org", title: "IMSLP — Free sheet music", description: "Public-domain scores library.", collection: "Music", tags: ["sheet music"] },
+      { userId: user.id, url: "https://www.khanacademy.org", title: "Khan Academy", description: "Free lessons on every subject.", collection: "School", tags: ["study"] },
+      { userId: user.id, url: "https://news.ycombinator.com", title: "Hacker News", description: "Tech news and discussion.", collection: "Dev", tags: ["news"] },
+    ],
+  });
+
+  // --- Cycle (sample, sensitive) ------------------------------------------
+  for (let i = 0; i < 5; i++) {
+    await prisma.cycleEntry.create({
+      data: {
+        userId: user.id,
+        date: daysAgo(26 + i),
+        periodDay: true,
+        flowIntensity: i === 0 ? "spotting" : i < 3 ? "medium" : "light",
+        symptoms: i < 2 ? ["cramps", "fatigue"] : [],
+      },
+    });
+  }
 
   console.log(`Seeded demo user: ${DEMO_EMAIL} / password123`);
 }
