@@ -23,9 +23,12 @@ export default auth((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isLoggedIn && isPublic) {
-    return NextResponse.redirect(new URL("/", nextUrl));
-  }
+  // NOTE: we intentionally do NOT redirect logged-in users away from /login.
+  // The edge middleware can't verify the session's user still exists in the DB;
+  // if it doesn't (e.g. after a DB reseed), the dashboard layout redirects to
+  // /login while a middleware bounce back to / would create an infinite loop.
+  // Letting /login always render breaks that loop; signing in overwrites the
+  // stale cookie, so the session self-heals.
 
   return NextResponse.next();
 });
