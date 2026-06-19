@@ -44,9 +44,10 @@ function filterToQuery(f: TaskFilter): string {
 
 // --- Queries ---------------------------------------------------------------
 
-export function useTasks(filter: TaskFilter) {
+export function useTasks(filter: TaskFilter, enabled = true) {
   return useQuery({
     queryKey: keys.tasks(filter),
+    enabled,
     queryFn: () =>
       jsonFetch<{ tasks: TaskDTO[]; total: number }>(
         `/api/tasks?${filterToQuery(filter)}`,
