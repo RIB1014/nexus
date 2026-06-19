@@ -173,6 +173,19 @@ export function TaskDetailDialog({
               className="h-9"
             />
           </Field>
+          <Field label="Repeat">
+            <select
+              value={task.recurrence ?? "none"}
+              onChange={(e) => patch({ recurrence: e.target.value === "none" ? null : e.target.value })}
+              className="h-9 w-full rounded-md border border-line bg-canvas px-2 text-small text-fg outline-none focus-visible:border-accent"
+            >
+              <option value="none">Does not repeat</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="biweekly">Every 2 weeks</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </Field>
         </div>
 
         {/* Priority */}

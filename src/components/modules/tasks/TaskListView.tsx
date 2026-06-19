@@ -1,24 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { Flag, ChevronRight, Circle, CheckCircle2 } from "lucide-react";
+import { Flag, ChevronRight, Circle, CheckCircle2, Repeat, Square, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TaskDTO } from "@/types/task";
 import { PRIORITY_META } from "@/types/task";
 import { formatDueLabel, DUE_TONE_CLASS } from "@/lib/tasks/format";
 import { useUpdateTask } from "@/lib/hooks/useTasks";
 
-export function TaskListView({
-  tasks,
-  onOpen,
-}: {
+interface ListViewProps {
   tasks: TaskDTO[];
   onOpen: (task: TaskDTO) => void;
-}) {
+  selectionMode?: boolean;
+  selected?: Set<string>;
+  onToggleSelect?: (id: string) => void;
+}
+
+export function TaskListView({ tasks, onOpen, selectionMode, selected, onToggleSelect }: ListViewProps) {
   return (
     <div className="overflow-hidden rounded-lg border border-line bg-panel">
       {tasks.map((t, i) => (
-        <TaskRow key={t.id} task={t} onOpen={onOpen} first={i === 0} />
+        <TaskRow
+          key={t.id}
+          task={t}
+          onOpen={onOpen}
+          first={i === 0}
+          selectionMode={selectionMode}
+          isSelected={selected?.has(t.id) ?? false}
+          onToggleSelect={onToggleSelect}
+        />
       ))}
     </div>
   );
@@ -28,10 +38,16 @@ function TaskRow({
   task,
   onOpen,
   first,
+  selectionMode,
+  isSelected,
+  onToggleSelect,
 }: {
   task: TaskDTO;
   onOpen: (task: TaskDTO) => void;
   first: boolean;
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }) {
   const update = useUpdateTask();
   const [expanded, setExpanded] = useState(false);
@@ -40,27 +56,37 @@ function TaskRow({
   const doneSubs = task.subtasks.filter((s) => s.completed).length;
 
   return (
-    <div className={cn(!first && "border-t border-line")}>
+    <div className={cn(!first && "border-t border-line", isSelected && "bg-accent-muted/30")}>
       <div
         className="group flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-inset/60"
         style={{
           borderLeft: `2px solid ${PRIORITY_META[task.priority].color}`,
         }}
       >
-        <button
-          onClick={() => update.mutate({ id: task.id, patch: { completed: !task.completed } })}
-          className="shrink-0 text-muted transition-colors hover:text-accent"
-          aria-label={task.completed ? "Mark incomplete" : "Mark complete"}
-        >
-          {task.completed ? (
-            <CheckCircle2 className="size-[18px] text-accent" />
-          ) : (
-            <Circle className="size-[18px]" />
-          )}
-        </button>
+        {selectionMode ? (
+          <button
+            onClick={() => onToggleSelect?.(task.id)}
+            className="shrink-0 text-muted transition-colors hover:text-accent"
+            aria-label={isSelected ? "Deselect" : "Select"}
+          >
+            {isSelected ? <CheckSquare className="size-[18px] text-accent" /> : <Square className="size-[18px]" />}
+          </button>
+        ) : (
+          <button
+            onClick={() => update.mutate({ id: task.id, patch: { completed: !task.completed } })}
+            className="shrink-0 text-muted transition-colors hover:text-accent"
+            aria-label={task.completed ? "Mark incomplete" : "Mark complete"}
+          >
+            {task.completed ? (
+              <CheckCircle2 className="size-[18px] text-accent" />
+            ) : (
+              <Circle className="size-[18px]" />
+            )}
+          </button>
+        )}
 
         <button
-          onClick={() => onOpen(task)}
+          onClick={() => (selectionMode ? onToggleSelect?.(task.id) : onOpen(task))}
           className="min-w-0 flex-1 text-left"
         >
           <div className="flex items-center gap-2">
@@ -98,6 +124,9 @@ function TaskRow({
           )}
         </button>
 
+        {task.recurrence && task.recurrence !== "none" && (
+          <Repeat className="size-3.5 shrink-0 text-muted" aria-label="Repeats" />
+        )}
         {task.flagged && (
           <Flag className="size-3.5 shrink-0 text-amber-500" fill="currentColor" />
         )}

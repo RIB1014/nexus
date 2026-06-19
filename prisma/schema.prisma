@@ -54,6 +54,7 @@ model User {
   expenses         Expense[]
   budgets          Budget[]
   links            Link[]
+  attachments      Attachment[]
 }
 
 model Account {
@@ -197,9 +198,30 @@ model Note {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  children Note[] @relation("NoteChildren")
-  parent   Note?  @relation("NoteChildren", fields: [parentId], references: [id], onDelete: Cascade)
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  children    Note[]       @relation("NoteChildren")
+  parent      Note?        @relation("NoteChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attachments Attachment[]
+}
+
+// ---------------------------------------------------------------------------
+// Files & uploads (incl. GoodNotes PDF/image exports)
+// ---------------------------------------------------------------------------
+
+model Attachment {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  mimeType   String
+  size       Int
+  storageKey String // filename on disk under /uploads
+  noteId     String? // optional link to a Notes page
+  collection String? // user-defined folder, e.g. "GoodNotes"
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note       Note?    @relation(fields: [noteId], references: [id], onDelete: SetNull)
+
+  @@index([userId, noteId])
 }
 
 // ---------------------------------------------------------------------------
@@ -341,6 +363,7 @@ model CalendarEvent {
   location   String?
   notes      String?
   color      String?
+  recurrence String? // none | daily | weekdays | weekly
   sourceType String? // manual | outlook | canvas
   sourceId   String?
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -18,12 +18,19 @@ const patchSchema = z.object({
   location: z.string().max(200).nullable().optional(),
   notes: z.string().max(5000).nullable().optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().optional(),
+  recurrence: z.enum(["none", "daily", "weekdays", "weekly"]).nullable().optional(),
 });
+
+// Recurring occurrences carry a synthetic "<baseId>::<date>" id; edits/deletes
+// act on the underlying series row.
+function baseId(id: string): string {
+  return id.includes("::") ? id.split("::")[0] : id;
+}
 
 export async function PATCH(req: Request, { params }: Ctx) {
   const auth = await requireUser();
   if (auth instanceof NextResponse) return auth;
-  const { id } = await params;
+  const id = baseId((await params).id);
   if (!(await own(auth.userId, id))) return notFound("Event not found.");
 
   const body = await req.json().catch(() => null);
@@ -41,7 +48,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
 export async function DELETE(_req: Request, { params }: Ctx) {
   const auth = await requireUser();
   if (auth instanceof NextResponse) return auth;
-  const { id } = await params;
+  const id = baseId((await params).id);
   if (!(await own(auth.userId, id))) return notFound("Event not found.");
   await prisma.calendarEvent.delete({ where: { id } });
   return json({ ok: true });

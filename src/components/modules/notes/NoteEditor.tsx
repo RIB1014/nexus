@@ -14,6 +14,7 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { NoteDTO } from "@/types/note";
 import { useUpdateNote, useDeleteNote } from "@/lib/hooks/useNotes";
+import { NoteAttachments } from "./NoteAttachments";
 import { Button } from "@/components/ui/button";
 
 const EMOJIS = ["📄", "📝", "📚", "🎼", "💡", "✅", "📌", "🔖", "🧠", "⭐", "🗒️", "📈"];
@@ -125,6 +126,11 @@ export function NoteEditor({
       {/* Editor */}
       <div className="px-1 py-4">
         <EditorContent editor={editor} />
+      </div>
+
+      {/* Attachments */}
+      <div className="px-1">
+        <NoteAttachments noteId={note.id} />
       </div>
 
       {/* Footer */}

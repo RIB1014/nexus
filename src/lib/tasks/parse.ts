@@ -10,12 +10,15 @@ import {
 
 export type Priority = "none" | "low" | "medium" | "high" | "urgent";
 
+export type Recurrence = "none" | "daily" | "weekly" | "biweekly" | "monthly";
+
 export interface ParsedTask {
   title: string;
   dueDate: Date | null;
   dueTime: string | null; // "HH:MM"
   priority: Priority;
   tags: string[];
+  recurrence: Recurrence;
 }
 
 const WEEKDAYS: Record<string, Day> = {
@@ -63,6 +66,7 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedTask
   let priority: Priority = "none";
   let dueDate: Date | null = null;
   let dueTime: string | null = null;
+  let recurrence: Recurrence = "none";
   const tags: string[] = [];
 
   // Tags: #word
@@ -70,6 +74,12 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedTask
     tags.push(String(tag).toLowerCase());
     return " ";
   });
+
+  // Recurrence: "every day", "daily", "every week", "weekly", "biweekly", "monthly"
+  text = text.replace(/\bevery\s+2\s+weeks\b|\bbiweekly\b/i, () => { recurrence = "biweekly"; return " "; });
+  text = text.replace(/\bevery\s*day\b|\bdaily\b/i, () => { recurrence = "daily"; return " "; });
+  text = text.replace(/\bevery\s*week\b|\bweekly\b/i, () => { recurrence = "weekly"; return " "; });
+  text = text.replace(/\bevery\s*month\b|\bmonthly\b/i, () => { recurrence = "monthly"; return " "; });
 
   // Priority: "!high", "high priority", or a bare priority word.
   text = text.replace(
@@ -143,5 +153,6 @@ export function parseQuickAdd(input: string, now: Date = new Date()): ParsedTask
     dueTime,
     priority,
     tags,
+    recurrence,
   };
 }

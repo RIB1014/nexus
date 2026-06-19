@@ -89,6 +89,7 @@ export interface CreateTaskInput {
   priority?: string;
   flagged?: boolean;
   estimatedMin?: number | null;
+  recurrence?: string | null;
   tags?: string[];
 }
 
@@ -116,6 +117,7 @@ export type UpdateTaskInput = Partial<{
   status: "todo" | "in_progress" | "done";
   estimatedMin: number | null;
   order: number;
+  recurrence: string | null;
   tags: string[];
 }>;
 

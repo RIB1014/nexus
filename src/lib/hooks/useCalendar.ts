@@ -33,6 +33,7 @@ export interface EventInput {
   location?: string | null;
   notes?: string | null;
   color?: string | null;
+  recurrence?: string | null;
 }
 
 export function useCreateEvent() {

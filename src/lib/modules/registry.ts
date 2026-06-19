@@ -11,6 +11,7 @@ import {
   Droplet,
   Wallet,
   Link2,
+  FolderOpen,
 } from "lucide-react";
 import type { ModuleDefinition } from "@/types/module";
 
@@ -136,6 +137,15 @@ export const MODULES: ModuleDefinition[] = [
     category: "productivity",
     defaultEnabled: false,
     recommendedFor: ["student", "developer", "artist"],
+  },
+  {
+    id: "files",
+    name: "Files & Uploads",
+    description: "Upload PDFs, images, and GoodNotes exports — preview and organize them.",
+    icon: FolderOpen,
+    category: "productivity",
+    defaultEnabled: false,
+    recommendedFor: ["student", "artist", "developer", "musician"],
   },
 ];
 

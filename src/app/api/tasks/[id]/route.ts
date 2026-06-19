@@ -72,7 +72,40 @@ export async function PATCH(req: Request, { params }: Ctx) {
     data,
     include: taskInclude,
   });
+
+  // Recurring tasks: completing one spawns the next occurrence.
+  if (completed === true && task.recurrence && task.recurrence !== "none") {
+    const nextDue = advanceDate(task.dueDate ?? new Date(), task.recurrence);
+    await prisma.task.create({
+      data: {
+        userId: auth.userId,
+        listId: task.listId,
+        title: task.title,
+        notes: task.notes,
+        priority: task.priority,
+        flagged: task.flagged,
+        estimatedMin: task.estimatedMin,
+        recurrence: task.recurrence,
+        dueDate: nextDue,
+        dueTime: task.dueTime,
+        tags: { connect: task.tags.map((t) => ({ id: t.id })) },
+      },
+    });
+  }
+
   return json({ task: serializeTask(task) });
+}
+
+function advanceDate(from: Date, rule: string): Date {
+  const d = new Date(from);
+  switch (rule) {
+    case "daily": d.setDate(d.getDate() + 1); break;
+    case "weekly": d.setDate(d.getDate() + 7); break;
+    case "biweekly": d.setDate(d.getDate() + 14); break;
+    case "monthly": d.setMonth(d.getMonth() + 1); break;
+    default: d.setDate(d.getDate() + 1);
+  }
+  return d;
 }
 
 export async function DELETE(_req: Request, { params }: Ctx) {

@@ -34,6 +34,7 @@ export function QuickAddBar({
       tags: parsed.tags,
       flagged: defaultFlagged,
       listId: listId ?? null,
+      recurrence: parsed.recurrence !== "none" ? parsed.recurrence : null,
     });
     setValue("");
   };
@@ -45,6 +46,7 @@ export function QuickAddBar({
       <div className="flex items-center gap-2 px-3">
         <Plus className="size-4 shrink-0 text-faint" />
         <input
+          id="quick-add-input"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
@@ -53,7 +55,7 @@ export function QuickAddBar({
               submit();
             }
           }}
-          placeholder="Add a task — try “essay tomorrow 3pm high #school”"
+          placeholder="Add a task — try “essay tomorrow 3pm high #school every week”"
           className="h-11 flex-1 bg-transparent text-body text-fg outline-none placeholder:text-faint"
         />
         {value.trim() && (

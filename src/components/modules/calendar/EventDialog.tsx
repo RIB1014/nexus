@@ -21,13 +21,22 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   event?: CalendarEventDTO | null;
   defaultDate?: Date;
+  defaultStart?: Date;
+  defaultEnd?: Date;
 }
+
+const RECURRENCE = [
+  { id: "none", label: "Does not repeat" },
+  { id: "daily", label: "Daily" },
+  { id: "weekdays", label: "Every weekday" },
+  { id: "weekly", label: "Weekly" },
+] as const;
 
 function combine(dateStr: string, timeStr: string): string {
   return new Date(`${dateStr}T${timeStr || "00:00"}:00`).toISOString();
 }
 
-export function EventDialog({ open, onOpenChange, event, defaultDate }: Props) {
+export function EventDialog({ open, onOpenChange, event, defaultDate, defaultStart, defaultEnd }: Props) {
   const create = useCreateEvent();
   const update = useUpdateEvent();
   const del = useDeleteEvent();
@@ -41,6 +50,7 @@ export function EventDialog({ open, onOpenChange, event, defaultDate }: Props) {
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [color, setColor] = useState(COLORS[0]);
+  const [recurrence, setRecurrence] = useState<string>("none");
 
   useEffect(() => {
     if (!open) return;
@@ -55,18 +65,21 @@ export function EventDialog({ open, onOpenChange, event, defaultDate }: Props) {
       setLocation(event.location ?? "");
       setNotes(event.notes ?? "");
       setColor(event.color ?? COLORS[0]);
+      setRecurrence(event.recurrence ?? "none");
     } else {
-      const base = defaultDate ?? new Date();
+      const base = defaultStart ?? defaultDate ?? new Date();
+      const end = defaultEnd ?? new Date(base.getTime() + 60 * 60 * 1000);
       setTitle("");
       setDate(format(base, "yyyy-MM-dd"));
       setAllDay(false);
       setStartTime(format(base, "HH:mm") === "00:00" ? "09:00" : format(base, "HH:mm"));
-      setEndTime("10:00");
+      setEndTime(format(end, "HH:mm"));
       setLocation("");
       setNotes("");
       setColor(COLORS[0]);
+      setRecurrence("none");
     }
-  }, [open, event, defaultDate]);
+  }, [open, event, defaultDate, defaultStart, defaultEnd]);
 
   const save = async () => {
     if (!title.trim()) return;
@@ -78,8 +91,9 @@ export function EventDialog({ open, onOpenChange, event, defaultDate }: Props) {
       location: location || null,
       notes: notes || null,
       color,
+      recurrence,
     };
-    if (editing && event) await update.mutateAsync({ id: event.id, patch: payload });
+    if (editing && event) await update.mutateAsync({ id: event.recurringBaseId ?? event.id, patch: payload });
     else await create.mutateAsync(payload);
     onOpenChange(false);
   };
@@ -162,16 +176,26 @@ export function EventDialog({ open, onOpenChange, event, defaultDate }: Props) {
             className="min-h-16"
           />
 
-          <div className="flex gap-2">
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setColor(c)}
-                className={cn("size-6 rounded-full", color === c && "ring-2 ring-offset-2 ring-offset-surface")}
-                style={{ background: c, ...(color === c ? { boxShadow: `0 0 0 2px ${c}` } : {}) }}
-                aria-label={c}
-              />
-            ))}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex gap-2">
+              {COLORS.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setColor(c)}
+                  className={cn("size-6 rounded-full", color === c && "ring-2 ring-offset-2 ring-offset-surface")}
+                  style={{ background: c, ...(color === c ? { boxShadow: `0 0 0 2px ${c}` } : {}) }}
+                  aria-label={c}
+                />
+              ))}
+            </div>
+            <select
+              value={recurrence}
+              onChange={(e) => setRecurrence(e.target.value)}
+              className="h-9 rounded-md border border-line bg-canvas px-2 text-small text-fg outline-none focus-visible:border-accent"
+              title="Repeat"
+            >
+              {RECURRENCE.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
+            </select>
           </div>
         </div>
 
