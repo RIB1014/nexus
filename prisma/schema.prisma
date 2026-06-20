@@ -55,6 +55,7 @@ model User {
   budgets          Budget[]
   links            Link[]
   attachments      Attachment[]
+  eventCalendars   EventCalendar[]
 }
 
 model Account {
@@ -353,20 +354,34 @@ model CycleEntry {
 // Calendar
 // ---------------------------------------------------------------------------
 
+model EventCalendar {
+  id        String          @id @default(cuid())
+  userId    String
+  name      String
+  color     String          @default("#5b6cf0")
+  visible   Boolean         @default(true)
+  order     Int             @default(0)
+  createdAt DateTime        @default(now())
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events    CalendarEvent[]
+}
+
 model CalendarEvent {
-  id         String   @id @default(cuid())
+  id         String         @id @default(cuid())
   userId     String
+  calendarId String?
   title      String
   start      DateTime
   end        DateTime
-  allDay     Boolean  @default(false)
+  allDay     Boolean        @default(false)
   location   String?
   notes      String?
   color      String?
   recurrence String? // none | daily | weekdays | weekly
   sourceType String? // manual | outlook | canvas
   sourceId   String?
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  calendar   EventCalendar? @relation(fields: [calendarId], references: [id], onDelete: SetNull)
 
   @@index([userId, start])
 }

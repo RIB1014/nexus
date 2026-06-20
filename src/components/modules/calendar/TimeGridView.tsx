@@ -32,6 +32,8 @@ export function TimeGridView({
   onOpenEvent,
   onMoveEvent,
   onResizeEvent,
+  colorOf,
+  fmtTime,
 }: {
   days: Date[];
   events: CalendarEventDTO[];
@@ -39,6 +41,8 @@ export function TimeGridView({
   onOpenEvent: (e: CalendarEventDTO) => void;
   onMoveEvent: (e: CalendarEventDTO, newStart: Date) => void;
   onResizeEvent: (e: CalendarEventDTO, newEnd: Date) => void;
+  colorOf: (e: CalendarEventDTO) => string;
+  fmtTime: (d: Date) => string;
 }) {
   const gridRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -118,7 +122,7 @@ export function TimeGridView({
   }, [drag, days, events]);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-line bg-panel">
+    <div className="overflow-hidden rounded-lg border border-line bg-panel shadow-card">
       {/* Header */}
       <div className="grid border-b border-line" style={{ gridTemplateColumns: `56px repeat(${days.length}, 1fr)` }}>
         <div />
@@ -141,8 +145,8 @@ export function TimeGridView({
           <div key={i} className="min-h-7 border-l border-line p-0.5">
             {list.map((e) => (
               <button key={e.id} onClick={() => onOpenEvent(e)}
-                className={cn("mb-0.5 block w-full truncate rounded px-1 py-0.5 text-left text-[0.625rem]", e.isTask ? "border border-dashed text-accent" : "text-white")}
-                style={e.isTask ? { borderColor: "var(--color-accent)" } : { background: e.color ?? "var(--color-accent)" }}>
+                className={cn("mb-0.5 block w-full truncate rounded px-1 py-0.5 text-left text-[0.625rem]", e.isTask ? "border border-dashed" : "text-white")}
+                style={e.isTask ? { borderColor: colorOf(e), color: colorOf(e) } : { background: colorOf(e) }}>
                 {e.title}
               </button>
             ))}
@@ -192,7 +196,7 @@ export function TimeGridView({
                   )}
 
                   {/* events */}
-                  {eventsByDay[di].map((e) => <EventBlock key={e.id} e={e} day={day} onOpen={onOpenEvent} onStartMove={setDrag} dayIndex={di} />)}
+                  {eventsByDay[di].map((e) => <EventBlock key={e.id} e={e} onOpen={onOpenEvent} onStartMove={setDrag} dayIndex={di} colorOf={colorOf} fmtTime={fmtTime} />)}
 
                   {/* drag ghost */}
                   {drag && drag.dayIndex === di && (drag.kind === "create" || drag.kind === "move" || drag.kind === "resize") && (
@@ -215,13 +219,14 @@ function minToDate(day: Date, min: number): Date {
 }
 
 function EventBlock({
-  e, day, onOpen, onStartMove, dayIndex,
+  e, onOpen, onStartMove, dayIndex, colorOf, fmtTime,
 }: {
   e: CalendarEventDTO;
-  day: Date;
   onOpen: (e: CalendarEventDTO) => void;
   onStartMove: (d: Drag) => void;
   dayIndex: number;
+  colorOf: (e: CalendarEventDTO) => string;
+  fmtTime: (d: Date) => string;
 }) {
   const s = parseISO(e.start);
   const en = parseISO(e.end);
@@ -230,6 +235,7 @@ function EventBlock({
   const top = (startMin / 60) * HOUR_PX;
   const height = (durationMin / 60) * HOUR_PX;
   const isTask = e.isTask;
+  const color = colorOf(e);
 
   return (
     <div
@@ -241,8 +247,8 @@ function EventBlock({
       style={{
         top, height,
         ...(isTask
-          ? { borderColor: "var(--color-accent)", background: "var(--color-accent-muted)", color: "var(--color-accent)" }
-          : { background: e.color ?? "var(--color-accent)" }),
+          ? { borderColor: color, background: "var(--color-accent-muted)", color }
+          : { background: color }),
       }}
       onPointerDown={(ev) => {
         if (isTask) return;
@@ -255,7 +261,7 @@ function EventBlock({
         {e.recurrence && e.recurrence !== "none" && <span title="Repeats">↻</span>}
         <span className="truncate">{e.title}</span>
       </div>
-      <div className="opacity-80">{format(s, "h:mm")}–{format(en, "h:mm")}</div>
+      <div className="opacity-80">{fmtTime(s)}–{fmtTime(en)}</div>
       {!isTask && (
         <div
           className="absolute inset-x-0 bottom-0 h-1.5 cursor-ns-resize"

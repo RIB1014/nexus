@@ -60,6 +60,7 @@ export async function GET(req: Request) {
       location: e.location,
       notes: e.notes,
       color: e.color,
+      calendarId: e.calendarId,
       sourceType: e.sourceType,
       sourceId: e.sourceId,
     };
@@ -132,6 +133,7 @@ const createSchema = z.object({
   location: z.string().max(200).nullable().optional(),
   notes: z.string().max(5000).nullable().optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().optional(),
+  calendarId: z.string().nullable().optional(),
   recurrence: z.enum(["none", "daily", "weekdays", "weekly"]).nullable().optional(),
 });
 
@@ -155,7 +157,8 @@ export async function POST(req: Request) {
       allDay: parsed.data.allDay ?? false,
       location: parsed.data.location ?? null,
       notes: parsed.data.notes ?? null,
-      color: parsed.data.color ?? "#6366F1",
+      color: parsed.data.color ?? null,
+      calendarId: parsed.data.calendarId ?? null,
       recurrence: parsed.data.recurrence && parsed.data.recurrence !== "none" ? parsed.data.recurrence : null,
       sourceType: "manual",
     },

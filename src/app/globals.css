@@ -10,47 +10,54 @@
 --------------------------------------------------------------------------- */
 
 :root {
-  /* Backgrounds */
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f7f7f8;
-  --color-bg-tertiary: #eeeef1;
+  /* Backgrounds — warm off-white page, white cards that lift off it. */
+  --color-bg-primary: #f6f5f2;
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #edece8;
   --color-surface: #ffffff;
 
   /* Accent (overridden at runtime per preset / custom color) */
-  --color-accent: #6366f1;
-  --color-accent-rgb: 99 102 241;
-  --color-accent-muted: rgb(var(--color-accent-rgb) / 0.16);
+  --color-accent: #5b6cf0;
+  --color-accent-rgb: 91 108 240;
+  --color-accent-muted: rgb(var(--color-accent-rgb) / 0.13);
   --color-accent-contrast: #ffffff;
 
   /* Text */
-  --color-text-primary: #18181b;
-  --color-text-secondary: #57575f;
-  --color-text-muted: #9a9aa4;
+  --color-text-primary: #1b1b1f;
+  --color-text-secondary: #5b5b64;
+  --color-text-muted: #93939c;
 
-  /* Borders */
-  --color-border: #e8e8ec;
-  --color-border-strong: #d3d3da;
+  /* Borders — soft and warm. */
+  --color-border: #e7e5e0;
+  --color-border-strong: #d6d4cd;
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px rgb(17 17 20 / 0.04), 0 2px 6px rgb(17 17 20 / 0.05);
+  --shadow-pop: 0 4px 12px rgb(17 17 20 / 0.1), 0 2px 4px rgb(17 17 20 / 0.06);
 
   /* Radius scale (overridden at runtime by the Sharp/Default/Rounded setting) */
-  --app-radius-sm: 6px;
-  --app-radius-md: 10px;
+  --app-radius-sm: 7px;
+  --app-radius-md: 11px;
   --app-radius-lg: 16px;
 }
 
 .dark {
-  --color-bg-primary: #0b0b0e;
-  --color-bg-secondary: #141417;
-  --color-bg-tertiary: #1d1d22;
-  --color-surface: #18181c;
+  --color-bg-primary: #0a0a0c;
+  --color-bg-secondary: #16161a;
+  --color-bg-tertiary: #212127;
+  --color-surface: #18181d;
 
   --color-accent-contrast: #ffffff;
 
   --color-text-primary: #ededf0;
-  --color-text-secondary: #a1a1ac;
-  --color-text-muted: #6c6c77;
+  --color-text-secondary: #a2a2ad;
+  --color-text-muted: #6e6e79;
 
-  --color-border: #26262c;
-  --color-border-strong: #36363f;
+  --color-border: #26262b;
+  --color-border-strong: #36363d;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 8px rgb(0 0 0 / 0.35);
+  --shadow-pop: 0 6px 20px rgb(0 0 0 / 0.5);
 }
 
 /* Map semantic tokens onto Tailwind's utility namespace.
@@ -76,6 +83,9 @@
   --radius-sm: var(--app-radius-sm);
   --radius-md: var(--app-radius-md);
   --radius-lg: var(--app-radius-lg);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-pop: var(--shadow-pop);
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -127,16 +137,16 @@ body {
 --------------------------------------------------------------------------- */
 @layer components {
   .text-display {
-    font-size: 2.25rem;
-    line-height: 1.1;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-size: 2rem;
+    line-height: 1.12;
+    font-weight: 680;
+    letter-spacing: -0.025em;
   }
   .text-heading {
-    font-size: 1.25rem;
+    font-size: 1.1875rem;
     line-height: 1.3;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-weight: 620;
+    letter-spacing: -0.015em;
   }
   .text-body {
     font-size: 0.9375rem;

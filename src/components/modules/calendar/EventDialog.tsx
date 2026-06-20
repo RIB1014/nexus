@@ -23,6 +23,8 @@ interface Props {
   defaultDate?: Date;
   defaultStart?: Date;
   defaultEnd?: Date;
+  calendars?: { id: string; name: string; color: string }[];
+  defaultCalendarId?: string | null;
 }
 
 const RECURRENCE = [
@@ -36,7 +38,7 @@ function combine(dateStr: string, timeStr: string): string {
   return new Date(`${dateStr}T${timeStr || "00:00"}:00`).toISOString();
 }
 
-export function EventDialog({ open, onOpenChange, event, defaultDate, defaultStart, defaultEnd }: Props) {
+export function EventDialog({ open, onOpenChange, event, defaultDate, defaultStart, defaultEnd, calendars = [], defaultCalendarId }: Props) {
   const create = useCreateEvent();
   const update = useUpdateEvent();
   const del = useDeleteEvent();
@@ -49,7 +51,8 @@ export function EventDialog({ open, onOpenChange, event, defaultDate, defaultSta
   const [endTime, setEndTime] = useState("10:00");
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
-  const [color, setColor] = useState(COLORS[0]);
+  const [color, setColor] = useState<string | null>(null);
+  const [calendarId, setCalendarId] = useState<string | null>(null);
   const [recurrence, setRecurrence] = useState<string>("none");
 
   useEffect(() => {
@@ -64,7 +67,8 @@ export function EventDialog({ open, onOpenChange, event, defaultDate, defaultSta
       setEndTime(format(e, "HH:mm"));
       setLocation(event.location ?? "");
       setNotes(event.notes ?? "");
-      setColor(event.color ?? COLORS[0]);
+      setColor(event.color ?? null);
+      setCalendarId(event.calendarId ?? null);
       setRecurrence(event.recurrence ?? "none");
     } else {
       const base = defaultStart ?? defaultDate ?? new Date();
@@ -76,9 +80,11 @@ export function EventDialog({ open, onOpenChange, event, defaultDate, defaultSta
       setEndTime(format(end, "HH:mm"));
       setLocation("");
       setNotes("");
-      setColor(COLORS[0]);
+      setColor(null);
+      setCalendarId(defaultCalendarId ?? calendars[0]?.id ?? null);
       setRecurrence("none");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, event, defaultDate, defaultStart, defaultEnd]);
 
   const save = async () => {
@@ -91,6 +97,7 @@ export function EventDialog({ open, onOpenChange, event, defaultDate, defaultSta
       location: location || null,
       notes: notes || null,
       color,
+      calendarId,
       recurrence,
     };
     if (editing && event) await update.mutateAsync({ id: event.recurringBaseId ?? event.id, patch: payload });
@@ -176,18 +183,18 @@ export function EventDialog({ open, onOpenChange, event, defaultDate, defaultSta
             className="min-h-16"
           />
 
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex gap-2">
-              {COLORS.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setColor(c)}
-                  className={cn("size-6 rounded-full", color === c && "ring-2 ring-offset-2 ring-offset-surface")}
-                  style={{ background: c, ...(color === c ? { boxShadow: `0 0 0 2px ${c}` } : {}) }}
-                  aria-label={c}
-                />
-              ))}
-            </div>
+          {/* Calendar + repeat */}
+          <div className="grid grid-cols-2 gap-2">
+            {calendars.length > 0 && (
+              <select
+                value={calendarId ?? ""}
+                onChange={(e) => setCalendarId(e.target.value || null)}
+                className="h-9 rounded-md border border-line bg-canvas px-2 text-small text-fg outline-none focus-visible:border-accent"
+                title="Calendar"
+              >
+                {calendars.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            )}
             <select
               value={recurrence}
               onChange={(e) => setRecurrence(e.target.value)}
@@ -196,6 +203,15 @@ export function EventDialog({ open, onOpenChange, event, defaultDate, defaultSta
             >
               {RECURRENCE.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
             </select>
+          </div>
+
+          {/* Optional color override */}
+          <div className="flex items-center gap-2">
+            <span className="text-small text-muted">Color</span>
+            <button onClick={() => setColor(null)} className={cn("size-6 rounded-full border border-line text-[0.625rem] text-faint", color === null && "ring-2 ring-accent ring-offset-2 ring-offset-surface")} title="Use calendar color">A</button>
+            {COLORS.map((c) => (
+              <button key={c} onClick={() => setColor(c)} className={cn("size-6 rounded-full", color === c && "ring-2 ring-offset-2 ring-offset-surface")} style={{ background: c, ...(color === c ? { boxShadow: `0 0 0 2px ${c}` } : {}) }} aria-label={c} />
+            ))}
           </div>
         </div>
 

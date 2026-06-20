@@ -9,6 +9,7 @@ export interface CalendarEventDTO {
   color: string | null;
   sourceType: string | null; // 'manual' | 'outlook' | 'canvas' | 'task'
   sourceId: string | null;
+  calendarId?: string | null;
   recurrence?: string | null;
   /** Set on expanded recurring occurrences; points at the stored series row. */
   recurringBaseId?: string;

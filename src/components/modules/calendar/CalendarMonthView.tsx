@@ -15,17 +15,24 @@ export function CalendarMonthView({
   events,
   onCreate,
   onOpenEvent,
+  colorOf,
+  fmtTime,
+  weekStartsOn = 0,
 }: {
   cursor: Date;
   events: CalendarEventDTO[];
   onCreate: (date: Date) => void;
   onOpenEvent: (e: CalendarEventDTO) => void;
+  colorOf: (e: CalendarEventDTO) => string;
+  fmtTime: (d: Date) => string;
+  weekStartsOn?: 0 | 1;
 }) {
   const days = useMemo(() => {
-    const start = startOfWeek(startOfMonth(cursor));
-    const end = endOfWeek(endOfMonth(cursor));
+    const start = startOfWeek(startOfMonth(cursor), { weekStartsOn });
+    const end = endOfWeek(endOfMonth(cursor), { weekStartsOn });
     return eachDayOfInterval({ start, end });
-  }, [cursor]);
+  }, [cursor, weekStartsOn]);
+  const weekdayLabels = weekStartsOn === 1 ? [...WEEKDAYS.slice(1), WEEKDAYS[0]] : WEEKDAYS;
 
   const byDay = useMemo(() => {
     const map = new Map<string, CalendarEventDTO[]>();
@@ -41,9 +48,9 @@ export function CalendarMonthView({
   const today = new Date();
 
   return (
-    <div className="overflow-hidden rounded-lg border border-line bg-panel">
+    <div className="overflow-hidden rounded-lg border border-line bg-panel shadow-card">
       <div className="grid grid-cols-7 border-b border-line">
-        {WEEKDAYS.map((d) => (
+        {weekdayLabels.map((d) => (
           <div key={d} className="px-2 py-1.5 text-center text-micro text-faint">{d}</div>
         ))}
       </div>
@@ -82,12 +89,12 @@ export function CalendarMonthView({
                     )}
                     style={
                       e.isTask
-                        ? { borderColor: "var(--color-accent)", color: "var(--color-accent)" }
-                        : { background: e.color ?? "var(--color-accent)" }
+                        ? { borderColor: colorOf(e), color: colorOf(e) }
+                        : { background: colorOf(e) }
                     }
                   >
                     {!e.allDay && (
-                      <span className="shrink-0 opacity-80">{format(parseISO(e.start), "h:mma").toLowerCase().replace(":00", "")}</span>
+                      <span className="shrink-0 opacity-80">{fmtTime(parseISO(e.start))}</span>
                     )}
                     <span className="truncate">{e.title}</span>
                   </button>

@@ -273,7 +273,7 @@ export function TasksModule() {
         )}
       </div>
 
-      <TaskDetailDialog task={openTask} lists={lists} open={openId !== null} onOpenChange={(v) => !v && setOpenId(null)} />
+      <TaskDetailDialog task={openTask} lists={lists} allTags={allTags} open={openId !== null} onOpenChange={(v) => !v && setOpenId(null)} />
     </div>
   );
 }
