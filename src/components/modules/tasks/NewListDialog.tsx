@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Check, Smile } from "lucide-react";
 import { useCreateList } from "@/lib/hooks/useTasks";
 import {
   Dialog,
@@ -15,10 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
 import { PALETTE } from "@/lib/theme/palette";
 
 const DEFAULT_COLOR = PALETTE[8].hex; // blue
-const ICONS = ["", "📚", "🏠", "🎵", "💪", "💼", "🎨", "✅", "🛒", "✈️"];
 
 export function NewListDialog({
   open,
@@ -107,19 +106,13 @@ export function NewListDialog({
 
           <div className="flex flex-col gap-1.5">
             <Label>Icon (optional)</Label>
-            <div className="flex flex-wrap gap-1.5">
-              {ICONS.map((ic) => (
-                <button
-                  key={ic || "none"}
-                  onClick={() => setIcon(ic)}
-                  className={cn(
-                    "flex size-8 items-center justify-center rounded-md border text-base",
-                    icon === ic ? "border-accent bg-accent-muted" : "border-line hover:bg-inset",
-                  )}
-                >
-                  {ic || "∅"}
+            <div className="flex items-center gap-2.5">
+              <EmojiPicker value={icon || null} onChange={(e) => setIcon(e ?? "")} align="start">
+                <button className="flex size-9 items-center justify-center rounded-md border border-line hover:bg-inset" aria-label="Choose emoji">
+                  {icon ? <span className="text-lg leading-none">{icon}</span> : <Smile className="size-4 text-faint" />}
                 </button>
-              ))}
+              </EmojiPicker>
+              <span className="text-small text-muted">{icon ? "Click to change" : "Click to pick any emoji"}</span>
             </div>
           </div>
         </div>

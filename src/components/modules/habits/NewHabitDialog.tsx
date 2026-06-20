@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Smile } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCreateHabit } from "@/lib/hooks/useHabits";
 import {
@@ -13,8 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
 
-const EMOJIS = ["✅", "🎹", "📖", "🏃", "💧", "🧘", "🛏️", "🥗", "✍️", "🧹", "☀️", "💪"];
 const COLORS = ["#6366F1", "#22C55E", "#F97316", "#38BDF8", "#F43F5E", "#A78BFA"];
 const FREQS = [
   { id: "daily", label: "Every day" },
@@ -73,19 +74,13 @@ export function NewHabitDialog({
 
           <div className="flex flex-col gap-1.5">
             <Label>Icon</Label>
-            <div className="flex flex-wrap gap-1.5">
-              {EMOJIS.map((e) => (
-                <button
-                  key={e}
-                  onClick={() => setEmoji(e)}
-                  className={cn(
-                    "flex size-8 items-center justify-center rounded-md border text-base",
-                    emoji === e ? "border-accent bg-accent-muted" : "border-line hover:bg-inset",
-                  )}
-                >
-                  {e}
+            <div className="flex items-center gap-2.5">
+              <EmojiPicker value={emoji || null} onChange={(e) => setEmoji(e ?? "")} align="start">
+                <button className="flex size-9 items-center justify-center rounded-md border border-line hover:bg-inset" aria-label="Choose emoji">
+                  {emoji ? <span className="text-lg leading-none">{emoji}</span> : <Smile className="size-4 text-faint" />}
                 </button>
-              ))}
+              </EmojiPicker>
+              <span className="text-small text-muted">Click to pick any emoji</span>
             </div>
           </div>
 

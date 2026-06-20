@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Nunito, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
@@ -29,6 +29,19 @@ export const metadata: Metadata = {
   title: "Orbit",
   description:
     "A modular productivity platform — build up exactly the tools you need.",
+  applicationName: "Orbit",
+  appleWebApp: {
+    capable: true,
+    title: "Orbit",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#5b6cf0",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
