@@ -6,6 +6,7 @@ export interface EventCalendarDTO {
   id: string;
   name: string;
   color: string;
+  icon?: string | null;
   visible: boolean;
   order: number;
 }
@@ -32,7 +33,7 @@ export function useCalendars() {
 export function useCreateCalendar() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: { name: string; color?: string }) =>
+    mutationFn: (input: { name: string; color?: string; icon?: string | null }) =>
       jsonFetch("/api/calendars", { method: "POST", body: JSON.stringify(input) }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["calendars"] }),
   });

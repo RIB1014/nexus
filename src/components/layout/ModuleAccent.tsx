@@ -20,8 +20,9 @@ export function ModuleAccent({
 }) {
   const pathname = usePathname();
   const accent = useAppStore((s) => s.accentColor);
+  const overrides = useAppStore((s) => s.moduleOverrides);
   const slug = pathname.split("/")[1] ?? "";
-  const color = slug in MODULE_COLORS ? MODULE_COLORS[slug] : accent;
+  const color = overrides[slug]?.color ?? (slug in MODULE_COLORS ? MODULE_COLORS[slug] : accent);
   return (
     <AccentScope color={color} className={className}>
       {children}

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/useAppStore";
 import { MODULE_MAP } from "@/lib/modules/registry";
 import { moduleColor } from "@/lib/modules/colors";
-import { ColorIcon } from "@/components/ui/color-picker";
+import { ModuleTile } from "@/components/modules/ModuleTile";
 import { BrandMark } from "./BrandMark";
 import {
   Tooltip,
@@ -27,6 +27,7 @@ export function Sidebar({ enabledModuleIds }: SidebarProps) {
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const appName = useAppStore((s) => s.appName);
   const accentColor = useAppStore((s) => s.accentColor);
+  const overrides = useAppStore((s) => s.moduleOverrides);
 
   const modules = enabledModuleIds.map((id) => MODULE_MAP[id]).filter(Boolean);
   const isCollapsed = collapsed || !showLabels;
@@ -55,7 +56,7 @@ export function Sidebar({ enabledModuleIds }: SidebarProps) {
           href="/"
           label="Home"
           color={accentColor}
-          icon={<Home className="size-4" />}
+          tile={<ModuleTile color={accentColor} Icon={Home} className="size-7 shadow-sm" />}
           active={pathname === "/"}
           collapsed={isCollapsed}
           onHover={() => router.prefetch("/")}
@@ -69,14 +70,15 @@ export function Sidebar({ enabledModuleIds }: SidebarProps) {
 
         {modules.map((m) => {
           const href = `/${m.id}`;
-          const Icon = m.icon;
+          const color = overrides[m.id]?.color ?? moduleColor(m.id);
+          const emoji = overrides[m.id]?.emoji;
           return (
             <NavItem
               key={m.id}
               href={href}
               label={m.name}
-              color={moduleColor(m.id)}
-              icon={<Icon className="size-4" />}
+              color={color}
+              tile={<ModuleTile color={color} emoji={emoji} Icon={m.icon} className="size-7 shadow-sm" />}
               active={pathname === href || pathname.startsWith(href + "/")}
               collapsed={isCollapsed}
               onHover={() => router.prefetch(href)}
@@ -91,7 +93,7 @@ export function Sidebar({ enabledModuleIds }: SidebarProps) {
           href="/settings/modules"
           label="Add modules"
           color="#8E8E93"
-          icon={<Plus className="size-4" />}
+          tile={<ModuleTile color="#8E8E93" Icon={Plus} className="size-7 shadow-sm" />}
           active={false}
           collapsed={isCollapsed}
         />
@@ -99,7 +101,7 @@ export function Sidebar({ enabledModuleIds }: SidebarProps) {
           href="/settings"
           label="Settings"
           color="#8E8E93"
-          icon={<Settings className="size-4" />}
+          tile={<ModuleTile color="#8E8E93" Icon={Settings} className="size-7 shadow-sm" />}
           active={pathname.startsWith("/settings")}
           collapsed={isCollapsed}
           onHover={() => router.prefetch("/settings")}
@@ -121,7 +123,7 @@ export function Sidebar({ enabledModuleIds }: SidebarProps) {
 function NavItem({
   href,
   label,
-  icon,
+  tile,
   color,
   active,
   collapsed,
@@ -129,7 +131,7 @@ function NavItem({
 }: {
   href: string;
   label: string;
-  icon: React.ReactNode;
+  tile: React.ReactNode;
   color: string;
   active: boolean;
   collapsed: boolean;
@@ -146,9 +148,7 @@ function NavItem({
       )}
       style={active ? { background: `${color}22`, color } : undefined}
     >
-      <ColorIcon color={color} className="size-7 shadow-sm">
-        {icon}
-      </ColorIcon>
+      {tile}
       {!collapsed && <span className="truncate">{label}</span>}
     </Link>
   );

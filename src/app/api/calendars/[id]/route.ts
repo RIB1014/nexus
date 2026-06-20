@@ -12,6 +12,7 @@ async function own(userId: string, id: string) {
 const patchSchema = z.object({
   name: z.string().trim().min(1).max(40).optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+  icon: z.string().max(8).nullable().optional(),
   visible: z.boolean().optional(),
   order: z.number().int().optional(),
 });

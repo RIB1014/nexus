@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { MODULE_MAP } from "@/lib/modules/registry";
 import { moduleColor } from "@/lib/modules/colors";
 import { useUIStore } from "@/store/useUIStore";
+import { useAppStore } from "@/store/useAppStore";
 
 interface MobileNavProps {
   enabledModuleIds: string[];
@@ -15,6 +16,7 @@ interface MobileNavProps {
 export function MobileNav({ enabledModuleIds }: MobileNavProps) {
   const pathname = usePathname();
   const openPalette = useUIStore((s) => s.setCommandPaletteOpen);
+  const overrides = useAppStore((s) => s.moduleOverrides);
 
   // Home + up to 3 modules + Search = 5 touch targets.
   const modules = enabledModuleIds
@@ -34,14 +36,16 @@ export function MobileNav({ enabledModuleIds }: MobileNavProps) {
       {modules.map((m) => {
         const href = `/${m.id}`;
         const Icon = m.icon;
+        const color = overrides[m.id]?.color ?? moduleColor(m.id);
+        const emoji = overrides[m.id]?.emoji;
         return (
           <MobileItem
             key={m.id}
             href={href}
             label={m.name}
             active={pathname.startsWith(href)}
-            color={moduleColor(m.id)}
-            icon={<Icon className="size-5" />}
+            color={color}
+            icon={emoji ? <span className="text-lg leading-none">{emoji}</span> : <Icon className="size-5" />}
           />
         );
       })}

@@ -31,7 +31,8 @@ import type { DashboardData } from "@/lib/data/dashboard";
 import { widgetFor } from "./widgets";
 import { getModule } from "@/lib/modules/registry";
 import { moduleColor } from "@/lib/modules/colors";
-import { ColorIcon } from "@/components/ui/color-picker";
+import { ModuleTile } from "@/components/modules/ModuleTile";
+import { useAppStore } from "@/store/useAppStore";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -245,9 +246,9 @@ function WidgetFrame({
   handleProps?: React.HTMLAttributes<HTMLButtonElement>;
 }) {
   const meta = widgetFor(widget.moduleId);
-  const Icon = meta.icon;
   const Body = meta.Component;
-  const color = moduleColor(widget.moduleId);
+  const override = useAppStore((s) => s.moduleOverrides[widget.moduleId]);
+  const color = override?.color ?? moduleColor(widget.moduleId);
 
   return (
     <div
@@ -265,9 +266,7 @@ function WidgetFrame({
         >
           <GripVertical className="size-4" />
         </button>
-        <ColorIcon color={color} className="size-7 [&_svg]:size-4">
-          <Icon />
-        </ColorIcon>
+        <ModuleTile color={color} emoji={override?.emoji} Icon={meta.icon} className="size-7 [&_svg]:size-4" />
         <h3 className="flex-1 text-small font-semibold text-fg">{meta.title}</h3>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

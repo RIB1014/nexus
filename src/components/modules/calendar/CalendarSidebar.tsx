@@ -12,6 +12,7 @@ import {
 } from "@/lib/hooks/useCalendars";
 import { useCalendarPrefs } from "@/store/useCalendarPrefs";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
 import { PALETTE, PALETTE_HEXES } from "@/lib/theme/palette";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
@@ -99,6 +100,7 @@ export function CalendarSidebar({
             <CalendarRow key={c.id} cal={c}
               onToggle={() => update.mutate({ id: c.id, patch: { visible: !c.visible } })}
               onColor={(color) => update.mutate({ id: c.id, patch: { color } })}
+              onIcon={(icon) => update.mutate({ id: c.id, patch: { icon } })}
               onRename={(name) => update.mutate({ id: c.id, patch: { name } })}
               onDelete={() => del.mutate(c.id)} />
           ))}
@@ -109,11 +111,12 @@ export function CalendarSidebar({
 }
 
 function CalendarRow({
-  cal, onToggle, onColor, onRename, onDelete,
+  cal, onToggle, onColor, onIcon, onRename, onDelete,
 }: {
   cal: EventCalendarDTO;
   onToggle: () => void;
   onColor: (c: string) => void;
+  onIcon: (e: string | null) => void;
   onRename: (n: string) => void;
   onDelete: () => void;
 }) {
@@ -132,7 +135,8 @@ function CalendarRow({
         {cal.visible && <Check className="size-3 text-white" strokeWidth={3} />}
       </button>
 
-      <button onClick={onToggle} className="min-w-0 flex-1 text-left">
+      <button onClick={onToggle} className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
+        {cal.icon && <span className="text-sm leading-none">{cal.icon}</span>}
         {editing ? (
           <input autoFocus value={name} onChange={(e) => setName(e.target.value)}
             onClick={(e) => e.stopPropagation()}
@@ -161,12 +165,17 @@ function CalendarRow({
               </button>
             ))}
           </div>
-          <div className="mt-2 flex items-center gap-2 border-t border-line pt-2">
+          <div className="mt-2 flex items-center gap-1.5 border-t border-line pt-2">
             <ColorPicker value={cal.color} onChange={onColor} align="start">
-              <button className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-small text-muted hover:bg-inset hover:text-fg">
-                <span className="size-3.5 rounded-full" style={{ background: cal.color }} /> Custom…
+              <button className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-small text-muted hover:bg-inset hover:text-fg" title="Custom color">
+                <span className="size-3.5 rounded-full" style={{ background: cal.color }} /> Custom
               </button>
             </ColorPicker>
+            <EmojiPicker value={cal.icon} onChange={onIcon} align="start">
+              <button className="rounded-md px-1.5 py-1 text-small text-muted hover:bg-inset hover:text-fg" title="Emoji">
+                {cal.icon ? <span className="text-base leading-none">{cal.icon}</span> : "Emoji"}
+              </button>
+            </EmojiPicker>
             <button onClick={() => setEditing(true)} className="ml-auto rounded-md px-1.5 py-1 text-small text-muted hover:bg-inset hover:text-fg">Rename</button>
             <button onClick={onDelete} className="rounded-md p-1 text-faint hover:bg-red-500/10 hover:text-red-500" aria-label="Delete calendar"><Trash2 className="size-3.5" /></button>
           </div>

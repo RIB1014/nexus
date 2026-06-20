@@ -28,11 +28,15 @@ interface AppState {
   fontFamily: FontFamilyId;
   bgColor: string | null; // custom page background override (null = preset)
 
+  // Per-module visual overrides (custom color + emoji for nav/tiles)
+  moduleOverrides: Record<string, { color?: string; emoji?: string }>;
+
   // Layout
   sidebarCollapsed: boolean;
   sidebarShowLabels: boolean;
 
   setAppName: (name: string) => void;
+  setModuleOverride: (id: string, patch: { color?: string | null; emoji?: string | null }) => void;
   setPreset: (id: ThemePresetId, accent: string) => void;
   setCustomAccent: (hex: string) => void;
   setRadius: (r: RadiusScale) => void;
@@ -55,12 +59,29 @@ export const useAppStore = create<AppState>()(
       fontScale: "default",
       fontFamily: DEFAULT_FONT_FAMILY,
       bgColor: null,
+      moduleOverrides: {},
 
       sidebarCollapsed: false,
       sidebarShowLabels: true,
 
       setAppName: (appName) =>
         set({ appName: appName.trim().slice(0, 24) || DEFAULT_APP_NAME }),
+      setModuleOverride: (id, patch) =>
+        set((s) => {
+          const cur = { ...(s.moduleOverrides[id] ?? {}) };
+          if ("color" in patch) {
+            if (patch.color) cur.color = patch.color;
+            else delete cur.color;
+          }
+          if ("emoji" in patch) {
+            if (patch.emoji) cur.emoji = patch.emoji;
+            else delete cur.emoji;
+          }
+          const next = { ...s.moduleOverrides };
+          if (Object.keys(cur).length) next[id] = cur;
+          else delete next[id];
+          return { moduleOverrides: next };
+        }),
       setPreset: (id, accent) => set({ presetId: id, accentColor: accent }),
       setCustomAccent: (hex) =>
         set({ presetId: "custom", accentColor: hex, customAccent: hex }),

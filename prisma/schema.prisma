@@ -359,6 +359,7 @@ model EventCalendar {
   userId    String
   name      String
   color     String          @default("#5b6cf0")
+  icon      String?
   visible   Boolean         @default(true)
   order     Int             @default(0)
   createdAt DateTime        @default(now())

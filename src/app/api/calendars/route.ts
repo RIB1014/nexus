@@ -38,6 +38,7 @@ export async function GET() {
 const createSchema = z.object({
   name: z.string().trim().min(1).max(40),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+  icon: z.string().max(8).nullable().optional(),
 });
 
 export async function POST(req: Request) {
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
 
   const count = await prisma.eventCalendar.count({ where: { userId: auth.userId } });
   const calendar = await prisma.eventCalendar.create({
-    data: { userId: auth.userId, name: parsed.data.name, color: parsed.data.color ?? "#5b6cf0", order: count },
+    data: { userId: auth.userId, name: parsed.data.name, color: parsed.data.color ?? "#5b6cf0", icon: parsed.data.icon ?? null, order: count },
   });
   return json({ calendar }, { status: 201 });
 }
