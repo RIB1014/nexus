@@ -11,9 +11,10 @@ import {
   useCalendars, useCreateCalendar, useUpdateCalendar, useDeleteCalendar, type EventCalendarDTO,
 } from "@/lib/hooks/useCalendars";
 import { useCalendarPrefs } from "@/store/useCalendarPrefs";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { ColorPicker } from "@/components/ui/color-picker";
+import { PALETTE_HEXES } from "@/lib/theme/palette";
 
-const CAL_COLORS = ["#5b6cf0", "#22c55e", "#f97316", "#38bdf8", "#f43f5e", "#a78bfa", "#eab308", "#ec4899", "#14b8a6", "#64748b"];
+const CAL_COLORS = PALETTE_HEXES;
 
 export function CalendarSidebar({
   cursor, onPickDate, calendars,
@@ -108,23 +109,14 @@ function CalendarRow({
   const [name, setName] = useState(cal.name);
   return (
     <div className="group flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-inset/60">
-      {/* color + visibility */}
-      <Popover>
-        <PopoverTrigger asChild>
-          <button className="relative flex size-4 items-center justify-center rounded-[5px]" style={{ background: cal.visible ? cal.color : "transparent", border: `1.5px solid ${cal.color}` }} aria-label="Calendar color">
-            {cal.visible && <Check className="size-3 text-white" />}
-          </button>
-        </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto p-2">
-          <div className="grid grid-cols-5 gap-1.5">
-            {CAL_COLORS.map((c) => (
-              <button key={c} onClick={() => onColor(c)} className={cn("size-6 rounded-full", cal.color === c && "ring-2 ring-offset-2 ring-offset-surface")} style={{ background: c, ...(cal.color === c ? { boxShadow: `0 0 0 2px ${c}` } : {}) }} />
-            ))}
-          </div>
-        </PopoverContent>
-      </Popover>
+      {/* color (click to recolor) */}
+      <ColorPicker value={cal.color} onChange={onColor}>
+        <button className="relative flex size-4 items-center justify-center rounded-[5px] transition-transform hover:scale-110" style={{ background: cal.visible ? cal.color : "transparent", border: `1.5px solid ${cal.color}` }} aria-label="Calendar color">
+          {cal.visible && <Check className="size-3 text-white" />}
+        </button>
+      </ColorPicker>
 
-      <button onClick={onToggle} className="min-w-0 flex-1 text-left">
+      <button onClick={onToggle} className="min-w-0 flex-1 text-left" title="Toggle visibility">
         {editing ? (
           <input autoFocus value={name} onChange={(e) => setName(e.target.value)}
             onClick={(e) => e.stopPropagation()}

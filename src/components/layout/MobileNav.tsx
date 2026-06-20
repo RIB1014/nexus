@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Home, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MODULE_MAP } from "@/lib/modules/registry";
+import { moduleColor } from "@/lib/modules/colors";
 import { useUIStore } from "@/store/useUIStore";
 
 interface MobileNavProps {
@@ -22,11 +23,12 @@ export function MobileNav({ enabledModuleIds }: MobileNavProps) {
     .slice(0, 3);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 flex h-16 items-stretch border-t border-line bg-panel/95 backdrop-blur md:hidden">
+    <nav className="glass fixed inset-x-0 bottom-0 z-30 flex h-16 items-stretch border-t md:hidden" style={{ borderColor: "var(--glass-border)" }}>
       <MobileItem
         href="/"
         label="Home"
         active={pathname === "/"}
+        color="var(--color-accent)"
         icon={<Home className="size-5" />}
       />
       {modules.map((m) => {
@@ -38,6 +40,7 @@ export function MobileNav({ enabledModuleIds }: MobileNavProps) {
             href={href}
             label={m.name}
             active={pathname.startsWith(href)}
+            color={moduleColor(m.id)}
             icon={<Icon className="size-5" />}
           />
         );
@@ -58,19 +61,22 @@ function MobileItem({
   label,
   icon,
   active,
+  color,
 }: {
   href: string;
   label: string;
   icon: React.ReactNode;
   active: boolean;
+  color: string;
 }) {
   return (
     <Link
       href={href}
       className={cn(
-        "flex flex-1 flex-col items-center justify-center gap-1",
-        active ? "text-accent" : "text-faint",
+        "flex flex-1 flex-col items-center justify-center gap-1 transition-colors",
+        !active && "text-faint",
       )}
+      style={active ? { color } : undefined}
     >
       {icon}
       <span className="max-w-full truncate px-1 text-[0.625rem]">{label}</span>

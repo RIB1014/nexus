@@ -14,6 +14,52 @@ export type ThemePresetId =
 export type RadiusScale = "sharp" | "default" | "rounded";
 export type FontScale = "compact" | "default" | "comfortable";
 export type BaseMode = "light" | "dark" | "system";
+export type FontFamilyId = "system" | "rounded" | "geist" | "serif";
+
+export interface FontFamilyOption {
+  id: FontFamilyId;
+  name: string;
+  /** CSS font-family stack applied to --font-app. */
+  stack: string;
+  description: string;
+}
+
+// The default leans on the OS font — SF Pro on macOS/iOS — for a native,
+// Apple-clean feel with zero load cost. The others are opt-in via settings.
+export const FONT_FAMILIES: FontFamilyOption[] = [
+  {
+    id: "system",
+    name: "System",
+    stack:
+      '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    description: "Apple San Francisco on Mac — crisp and native.",
+  },
+  {
+    id: "rounded",
+    name: "Rounded",
+    stack:
+      'var(--font-rounded), ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", system-ui, sans-serif',
+    description: "Soft and friendly, the coziest option.",
+  },
+  {
+    id: "geist",
+    name: "Geist",
+    stack: 'var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif',
+    description: "Modern geometric — a designer-tool feel.",
+  },
+  {
+    id: "serif",
+    name: "Serif",
+    stack: 'var(--font-serif), Georgia, "Times New Roman", serif',
+    description: "Editorial and calm, nice for writing.",
+  },
+];
+
+export const DEFAULT_FONT_FAMILY: FontFamilyId = "system";
+
+export function fontFamilyById(id: FontFamilyId): FontFamilyOption {
+  return FONT_FAMILIES.find((f) => f.id === id) ?? FONT_FAMILIES[0];
+}
 
 export interface ThemePreset {
   id: ThemePresetId;
@@ -68,9 +114,9 @@ export const DEFAULT_PRESET: ThemePresetId = "slate";
 export const DEFAULT_ACCENT = "#6366F1";
 
 export const RADIUS_VALUES: Record<RadiusScale, { sm: string; md: string; lg: string }> = {
-  sharp: { sm: "2px", md: "4px", lg: "6px" },
-  default: { sm: "6px", md: "10px", lg: "16px" },
-  rounded: { sm: "10px", md: "16px", lg: "24px" },
+  sharp: { sm: "4px", md: "7px", lg: "10px" },
+  default: { sm: "8px", md: "12px", lg: "18px" }, // Apple-grouped-card feel
+  rounded: { sm: "12px", md: "18px", lg: "26px" },
 };
 
 export const FONT_SCALE_VALUES: Record<FontScale, string> = {
@@ -83,18 +129,5 @@ export function presetById(id: ThemePresetId): ThemePreset | undefined {
   return THEME_PRESETS.find((p) => p.id === id);
 }
 
-/** Convert a hex color to "r g b" channel string for rgb()/opacity composition. */
-export function hexToRgbChannels(hex: string): string {
-  const clean = hex.replace("#", "").trim();
-  const full =
-    clean.length === 3
-      ? clean
-          .split("")
-          .map((c) => c + c)
-          .join("")
-      : clean;
-  const r = parseInt(full.slice(0, 2), 16) || 0;
-  const g = parseInt(full.slice(2, 4), 16) || 0;
-  const b = parseInt(full.slice(4, 6), 16) || 0;
-  return `${r} ${g} ${b}`;
-}
+// Color math lives in palette.ts now; re-export so existing imports keep working.
+export { hexToRgbChannels, readableForeground } from "./palette";

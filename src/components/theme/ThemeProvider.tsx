@@ -6,25 +6,37 @@ import { useAppStore } from "@/store/useAppStore";
 import {
   FONT_SCALE_VALUES,
   RADIUS_VALUES,
+  fontFamilyById,
   hexToRgbChannels,
+  readableForeground,
 } from "@/lib/theme/presets";
 
 /**
- * Applies the user's appearance tokens (accent, radius, font scale) to the
- * document root as CSS variables whenever they change. Light/dark is handled
- * by next-themes (which sets the `dark` class).
+ * Applies the user's appearance tokens (accent, radius, font family + scale,
+ * background) to the document root as CSS variables whenever they change.
+ * Light/dark is handled by next-themes (which sets the `dark` class).
  */
 function AppearanceTokens() {
   const accentColor = useAppStore((s) => s.accentColor);
   const radius = useAppStore((s) => s.radius);
   const fontScale = useAppStore((s) => s.fontScale);
+  const fontFamily = useAppStore((s) => s.fontFamily);
   const bgColor = useAppStore((s) => s.bgColor);
 
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty("--color-accent", accentColor);
     root.style.setProperty("--color-accent-rgb", hexToRgbChannels(accentColor));
+    // Flip button/badge text to black on pale accents (yellow, mint, …).
+    root.style.setProperty("--color-accent-contrast", readableForeground(accentColor));
   }, [accentColor]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--font-app",
+      fontFamilyById(fontFamily).stack,
+    );
+  }, [fontFamily]);
 
   useEffect(() => {
     const root = document.documentElement;

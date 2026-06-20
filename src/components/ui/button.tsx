@@ -11,14 +11,16 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-accent text-accent-contrast hover:opacity-90 active:opacity-100",
+          "bg-accent text-accent-contrast shadow-card hover:opacity-90 active:scale-[0.98] active:opacity-100",
+        soft:
+          "bg-accent-soft text-accent hover:brightness-[0.97] active:scale-[0.98]",
         secondary:
           "bg-inset text-fg hover:bg-line border border-line",
         outline:
-          "border border-line bg-transparent text-fg hover:bg-inset",
+          "border border-line bg-panel text-fg shadow-card hover:bg-inset",
         ghost: "bg-transparent text-muted hover:bg-inset hover:text-fg",
         destructive:
-          "bg-red-500 text-white hover:bg-red-600",
+          "bg-red-500 text-white shadow-card hover:bg-red-600 active:scale-[0.98]",
         link: "text-accent underline-offset-4 hover:underline",
       },
       size: {

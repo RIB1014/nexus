@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCreateList } from "@/lib/hooks/useTasks";
 import {
@@ -13,8 +14,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { ColorPicker } from "@/components/ui/color-picker";
+import { PALETTE } from "@/lib/theme/palette";
 
-const COLORS = ["#6366F1", "#22C55E", "#F97316", "#38BDF8", "#F43F5E", "#A78BFA", "#EAB308", "#EC4899"];
+const DEFAULT_COLOR = PALETTE[8].hex; // blue
 const ICONS = ["", "📚", "🏠", "🎵", "💪", "💼", "🎨", "✅", "🛒", "✈️"];
 
 export function NewListDialog({
@@ -28,12 +31,12 @@ export function NewListDialog({
 }) {
   const create = useCreateList();
   const [name, setName] = useState("");
-  const [color, setColor] = useState(COLORS[0]);
+  const [color, setColor] = useState(DEFAULT_COLOR);
   const [icon, setIcon] = useState("");
 
   const reset = () => {
     setName("");
-    setColor(COLORS[0]);
+    setColor(DEFAULT_COLOR);
     setIcon("");
   };
 
@@ -77,19 +80,28 @@ export function NewListDialog({
 
           <div className="flex flex-col gap-1.5">
             <Label>Color</Label>
-            <div className="flex flex-wrap gap-2">
-              {COLORS.map((c) => (
+            <div className="flex flex-wrap items-center gap-2">
+              {PALETTE.slice(0, 10).map((s) => (
                 <button
-                  key={c}
-                  onClick={() => setColor(c)}
-                  className={cn(
-                    "size-7 rounded-full transition-transform",
-                    color === c && "ring-2 ring-offset-2 ring-offset-surface",
+                  key={s.id}
+                  onClick={() => setColor(s.hex)}
+                  className="flex size-7 items-center justify-center rounded-full transition-transform hover:scale-110"
+                  style={{ background: s.hex }}
+                  aria-label={s.name}
+                >
+                  {color.toLowerCase() === s.hex.toLowerCase() && (
+                    <Check className="size-4 text-white drop-shadow" strokeWidth={3} />
                   )}
-                  style={{ background: c, ...(color === c ? { boxShadow: `0 0 0 2px ${c}` } : {}) }}
-                  aria-label={`Color ${c}`}
-                />
+                </button>
               ))}
+              <ColorPicker value={color} onChange={setColor} align="end">
+                <button
+                  className="flex size-7 items-center justify-center rounded-full border border-dashed border-line-strong text-faint hover:bg-inset"
+                  aria-label="Custom color"
+                >
+                  +
+                </button>
+              </ColorPicker>
             </div>
           </div>
 

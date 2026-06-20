@@ -11,6 +11,8 @@ import {
 import { cn } from "@/lib/utils";
 import { PRIORITY_META, type Priority, type TaskListDTO, type TaskTagDTO } from "@/types/task";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { ColorPicker } from "@/components/ui/color-picker";
+import { useUpdateTag } from "@/lib/hooks/useTasks";
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -202,6 +204,7 @@ export function TagsChip({
 
 function TagsPanel({ value, allTags, onChange }: { value: string[]; allTags: TaskTagDTO[]; onChange: (t: string[]) => void }) {
   const [draft, setDraft] = useState("");
+  const updateTag = useUpdateTag();
   const toggle = (name: string) => onChange(value.includes(name) ? value.filter((t) => t !== name) : [...value, name]);
   const suggestions = allTags.filter((t) => t.name.includes(draft.toLowerCase()));
   return (
@@ -220,10 +223,17 @@ function TagsPanel({ value, allTags, onChange }: { value: string[]; allTags: Tas
           </button>
         )}
         {suggestions.map((t) => (
-          <button key={t.id} onClick={() => toggle(t.name)} className="flex items-center gap-2 rounded-md px-2 py-1.5 text-small text-fg hover:bg-inset">
-            <span className="size-2.5 rounded-full" style={{ background: t.color }} />{t.name}
-            {value.includes(t.name) && <Check className="ml-auto size-3.5 text-accent" />}
-          </button>
+          <div key={t.id} className="group/tag flex items-center gap-2 rounded-md px-2 py-1.5 text-small text-fg hover:bg-inset">
+            <ColorPicker value={t.color} onChange={(hex) => updateTag.mutate({ id: t.id, patch: { color: hex } })} align="start">
+              <button className="shrink-0 rounded-full p-0.5 transition-transform hover:scale-125" aria-label={`${t.name} color`}>
+                <span className="block size-2.5 rounded-full" style={{ background: t.color }} />
+              </button>
+            </ColorPicker>
+            <button onClick={() => toggle(t.name)} className="flex flex-1 items-center text-left">
+              {t.name}
+              {value.includes(t.name) && <Check className="ml-auto size-3.5 text-accent" />}
+            </button>
+          </div>
         ))}
       </div>
     </>

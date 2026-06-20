@@ -10,54 +10,74 @@
 --------------------------------------------------------------------------- */
 
 :root {
-  /* Backgrounds — warm off-white page, white cards that lift off it. */
-  --color-bg-primary: #f6f5f2;
-  --color-bg-secondary: #ffffff;
-  --color-bg-tertiary: #edece8;
-  --color-surface: #ffffff;
+  /* The app font — driven by the Font setting (ThemeProvider sets --font-app).
+     Defaults to the OS font (SF Pro on Apple devices). */
+  --font-app: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-  /* Accent (overridden at runtime per preset / custom color) */
+  /* Backgrounds — Apple "grouped table" system. A cool light-gray field with
+     white grouped cards/rows lifting off it. The gray is what kills the
+     "too much white". */
+  --color-bg-primary: #ececed;   /* canvas — the grouped-table field */
+  --color-bg-secondary: #ffffff; /* panel  — grouped cards / rows */
+  --color-bg-tertiary: #e6e6e9;  /* inset  — fills, hovers, wells */
+  --color-surface: #ffffff;      /* popovers, menus, dialogs */
+
+  /* Translucency (macOS vibrancy) for the sidebar + top bar. */
+  --glass-bg: rgba(255, 255, 255, 0.68);
+  --glass-border: rgba(0, 0, 0, 0.07);
+  --glass-blur: saturate(180%) blur(22px);
+
+  /* Accent (overridden at runtime per preset / custom color). The contrast and
+     soft-tint are recomputed by ThemeProvider / color-mix so any hue reads well. */
   --color-accent: #5b6cf0;
   --color-accent-rgb: 91 108 240;
-  --color-accent-muted: rgb(var(--color-accent-rgb) / 0.13);
+  --color-accent-muted: rgb(var(--color-accent-rgb) / 0.14);
+  --color-accent-soft: color-mix(in oklab, var(--color-accent) 12%, var(--color-surface));
   --color-accent-contrast: #ffffff;
 
-  /* Text */
-  --color-text-primary: #1b1b1f;
-  --color-text-secondary: #5b5b64;
-  --color-text-muted: #93939c;
+  /* Text — Apple label hierarchy. */
+  --color-text-primary: #1c1c1e;
+  --color-text-secondary: #6a6a6e;
+  --color-text-muted: #9a9aa0;
 
-  /* Borders — soft and warm. */
-  --color-border: #e7e5e0;
-  --color-border-strong: #d6d4cd;
+  /* Borders — hairline separators, very low contrast. */
+  --color-border: #e2e2e6;
+  --color-border-strong: #d0d0d6;
 
-  /* Elevation */
-  --shadow-card: 0 1px 2px rgb(17 17 20 / 0.04), 0 2px 6px rgb(17 17 20 / 0.05);
-  --shadow-pop: 0 4px 12px rgb(17 17 20 / 0.1), 0 2px 4px rgb(17 17 20 / 0.06);
+  /* Elevation — Apple grouped tables are nearly flat with a faint lift. */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 1px 1px rgb(0 0 0 / 0.03);
+  --shadow-pop: 0 12px 34px rgb(0 0 0 / 0.16), 0 3px 8px rgb(0 0 0 / 0.1);
 
   /* Radius scale (overridden at runtime by the Sharp/Default/Rounded setting) */
-  --app-radius-sm: 7px;
-  --app-radius-md: 11px;
-  --app-radius-lg: 16px;
+  --app-radius-sm: 8px;
+  --app-radius-md: 12px;
+  --app-radius-lg: 18px;
 }
 
 .dark {
-  --color-bg-primary: #0a0a0c;
-  --color-bg-secondary: #16161a;
-  --color-bg-tertiary: #212127;
-  --color-surface: #18181d;
+  /* Apple dark: near-black field, slightly raised grouped cards. */
+  --color-bg-primary: #000000;   /* canvas */
+  --color-bg-secondary: #1c1c1e; /* cards */
+  --color-bg-tertiary: #2c2c2e;  /* inset */
+  --color-surface: #232325;
 
+  --glass-bg: rgba(28, 28, 30, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  --color-accent-muted: rgb(var(--color-accent-rgb) / 0.24);
+  --color-accent-soft: color-mix(in oklab, var(--color-accent) 26%, var(--color-surface));
   --color-accent-contrast: #ffffff;
 
-  --color-text-primary: #ededf0;
-  --color-text-secondary: #a2a2ad;
-  --color-text-muted: #6e6e79;
+  --color-text-primary: #f2f2f7;
+  --color-text-secondary: #a6a6ad;
+  --color-text-muted: #6f6f78;
 
-  --color-border: #26262b;
-  --color-border-strong: #36363d;
+  --color-border: #38383a;
+  --color-border-strong: #48484a;
 
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 8px rgb(0 0 0 / 0.35);
-  --shadow-pop: 0 6px 20px rgb(0 0 0 / 0.5);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.5), 0 1px 1px rgb(0 0 0 / 0.4);
+  --shadow-pop: 0 12px 38px rgb(0 0 0 / 0.66), 0 3px 10px rgb(0 0 0 / 0.5);
 }
 
 /* Map semantic tokens onto Tailwind's utility namespace.
@@ -71,6 +91,7 @@
 
   --color-accent: var(--color-accent);
   --color-accent-muted: var(--color-accent-muted);
+  --color-accent-soft: var(--color-accent-soft);
   --color-accent-contrast: var(--color-accent-contrast);
 
   --color-fg: var(--color-text-primary);
@@ -87,7 +108,7 @@
   --shadow-card: var(--shadow-card);
   --shadow-pop: var(--shadow-pop);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-app);
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
@@ -102,8 +123,9 @@ html {
 body {
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-app);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
@@ -177,9 +199,62 @@ body {
   .bg-accent-gradient {
     background-image: linear-gradient(
       135deg,
-      var(--color-accent),
-      color-mix(in oklab, var(--color-accent) 78%, #000 22%)
+      color-mix(in oklab, var(--color-accent) 88%, #fff 12%),
+      color-mix(in oklab, var(--color-accent) 76%, #000 24%)
     );
+  }
+  /* A soft tinted fill of the current accent (Reminders "Today" pill, chips). */
+  .bg-accent-soft {
+    background-color: var(--color-accent-soft);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Grouped-card primitives — the Apple Reminders structural language.
+--------------------------------------------------------------------------- */
+@layer components {
+  /* A white card that lifts off the gray canvas. */
+  .app-card {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--app-radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+  /* A grouped list: rounded card whose direct children are hairline-divided rows. */
+  .grouped {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--app-radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .grouped > * + * {
+    border-top: 1px solid var(--color-border);
+  }
+  /* Small uppercase group header, like iOS section titles. */
+  .group-title {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    padding: 0 0.25rem 0.4rem;
+  }
+  /* macOS vibrancy: translucent, blurred chrome (sidebar, top bar, palette). */
+  .glass {
+    background-color: var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
+}
+
+@layer utilities {
+  /* A faint wash of the current accent — the Reminders "tinted everything". */
+  .bg-accent-wash {
+    background-color: color-mix(in oklab, var(--color-accent) 6%, var(--color-surface));
+  }
+  .text-accent-soft {
+    color: color-mix(in oklab, var(--color-accent) 70%, var(--color-text-secondary));
   }
 }
 

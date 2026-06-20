@@ -8,6 +8,7 @@ import { Search, Sun, Moon, LogOut, User as UserIcon, Settings } from "lucide-re
 import Link from "next/link";
 import { cn, initials } from "@/lib/utils";
 import { useUIStore } from "@/store/useUIStore";
+import { useAppStore } from "@/store/useAppStore";
 import { getModule } from "@/lib/modules/registry";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -23,21 +24,25 @@ interface TopBarProps {
   user: { name?: string | null; email?: string | null; image?: string | null };
 }
 
-function usePageTitle(): string {
+function usePageTitle(fallback: string): string {
   const pathname = usePathname();
   if (pathname === "/") return "Home";
   if (pathname.startsWith("/settings")) return "Settings";
   const slug = pathname.split("/")[1];
-  return getModule(slug)?.name ?? "Nexus";
+  return getModule(slug)?.name ?? fallback;
 }
 
 export function TopBar({ user }: TopBarProps) {
-  const title = usePageTitle();
+  const appName = useAppStore((s) => s.appName);
+  const title = usePageTitle(appName);
   const openPalette = useUIStore((s) => s.setCommandPaletteOpen);
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-line bg-canvas/80 px-4 backdrop-blur md:px-6">
-      <h1 className="text-heading truncate">{title}</h1>
+    <header
+      className="glass sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b px-4 md:px-6"
+      style={{ borderColor: "var(--glass-border)" }}
+    >
+      <h1 className="truncate text-[1.35rem] font-bold tracking-tight">{title}</h1>
 
       <div className="flex items-center gap-2">
         <button

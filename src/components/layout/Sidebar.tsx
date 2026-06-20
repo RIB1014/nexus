@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { PanelLeftClose, PanelLeft, Settings, Sparkles, Plus } from "lucide-react";
+import { PanelLeftClose, PanelLeft, Settings, Plus, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/useAppStore";
 import { MODULE_MAP } from "@/lib/modules/registry";
+import { moduleColor } from "@/lib/modules/colors";
+import { ColorIcon } from "@/components/ui/color-picker";
 import {
   Tooltip,
   TooltipContent,
@@ -22,49 +24,48 @@ export function Sidebar({ enabledModuleIds }: SidebarProps) {
   const collapsed = useAppStore((s) => s.sidebarCollapsed);
   const showLabels = useAppStore((s) => s.sidebarShowLabels);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
+  const appName = useAppStore((s) => s.appName);
+  const accentColor = useAppStore((s) => s.accentColor);
 
-  const modules = enabledModuleIds
-    .map((id) => MODULE_MAP[id])
-    .filter(Boolean);
-
+  const modules = enabledModuleIds.map((id) => MODULE_MAP[id]).filter(Boolean);
   const isCollapsed = collapsed || !showLabels;
 
   return (
     <aside
       className={cn(
-        "hidden h-screen shrink-0 flex-col border-r border-line bg-panel transition-[width] duration-200 ease-out md:flex",
-        isCollapsed ? "w-16" : "w-60",
+        "glass hidden h-screen shrink-0 flex-col border-r transition-[width] duration-200 ease-out md:flex",
+        isCollapsed ? "w-16" : "w-[15.5rem]",
       )}
+      style={{ borderColor: "var(--glass-border)" }}
     >
       {/* Brand */}
-      <div className="flex h-14 items-center gap-2 px-3">
+      <div className="flex h-14 items-center gap-2.5 px-3.5">
         <Link
           href="/"
-          className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent-gradient text-accent-contrast"
+          aria-label={appName}
+          className="flex size-8 shrink-0 items-center justify-center rounded-[var(--app-radius-md)] bg-accent-gradient text-sm font-bold text-accent-contrast shadow-card transition-transform hover:scale-105"
         >
-          <Sparkles className="size-4" />
+          {(appName.trim()[0] ?? "N").toUpperCase()}
         </Link>
-        {!isCollapsed && <span className="text-heading">Nexus</span>}
+        {!isCollapsed && (
+          <span className="truncate text-[1.05rem] font-bold tracking-tight">{appName}</span>
+        )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-2 py-2">
+      <nav className="flex-1 overflow-y-auto px-2.5 py-2">
         <NavItem
           href="/"
           label="Home"
+          color={accentColor}
+          icon={<Home className="size-4" />}
           active={pathname === "/"}
           collapsed={isCollapsed}
-          icon={<HomeGlyph />}
           onHover={() => router.prefetch("/")}
         />
 
         {modules.length > 0 && (
-          <p
-            className={cn(
-              "px-2 pb-1 pt-4 text-micro text-faint",
-              isCollapsed && "sr-only",
-            )}
-          >
+          <p className={cn("px-2 pb-1 pt-4 text-micro text-faint", isCollapsed && "sr-only")}>
             Modules
           </p>
         )}
@@ -77,9 +78,10 @@ export function Sidebar({ enabledModuleIds }: SidebarProps) {
               key={m.id}
               href={href}
               label={m.name}
+              color={moduleColor(m.id)}
+              icon={<Icon className="size-4" />}
               active={pathname === href || pathname.startsWith(href + "/")}
               collapsed={isCollapsed}
-              icon={<Icon className="size-[18px]" />}
               onHover={() => router.prefetch(href)}
             />
           );
@@ -87,31 +89,31 @@ export function Sidebar({ enabledModuleIds }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-line px-2 py-2">
+      <div className="border-t px-2.5 py-2" style={{ borderColor: "var(--glass-border)" }}>
         <NavItem
           href="/settings/modules"
           label="Add modules"
-          collapsed={isCollapsed}
+          color="#8E8E93"
+          icon={<Plus className="size-4" />}
           active={false}
-          icon={<Plus className="size-[18px]" />}
+          collapsed={isCollapsed}
         />
         <NavItem
           href="/settings"
           label="Settings"
+          color="#8E8E93"
+          icon={<Settings className="size-4" />}
           active={pathname.startsWith("/settings")}
           collapsed={isCollapsed}
-          icon={<Settings className="size-[18px]" />}
           onHover={() => router.prefetch("/settings")}
         />
         <button
           onClick={toggleSidebar}
-          className="mt-1 flex w-full items-center gap-3 rounded-md px-2 py-2 text-small text-muted transition-colors hover:bg-inset hover:text-fg"
+          className="mt-1 flex w-full items-center gap-3 rounded-[var(--app-radius-md)] px-2 py-1.5 text-small text-muted transition-colors hover:bg-inset hover:text-fg"
         >
-          {collapsed ? (
-            <PanelLeft className="size-[18px]" />
-          ) : (
-            <PanelLeftClose className="size-[18px]" />
-          )}
+          <span className="flex size-7 items-center justify-center">
+            {collapsed ? <PanelLeft className="size-4" /> : <PanelLeftClose className="size-4" />}
+          </span>
           {!isCollapsed && <span>Collapse</span>}
         </button>
       </div>
@@ -123,6 +125,7 @@ function NavItem({
   href,
   label,
   icon,
+  color,
   active,
   collapsed,
   onHover,
@@ -130,6 +133,7 @@ function NavItem({
   href: string;
   label: string;
   icon: React.ReactNode;
+  color: string;
   active: boolean;
   collapsed: boolean;
   onHover?: () => void;
@@ -139,16 +143,15 @@ function NavItem({
       href={href}
       onMouseEnter={onHover}
       className={cn(
-        "flex items-center gap-3 rounded-md px-2 py-2 text-small font-medium transition-colors",
+        "group/nav flex items-center gap-2.5 rounded-[var(--app-radius-md)] px-1.5 py-1 text-small font-medium transition-colors",
         collapsed && "justify-center",
-        active
-          ? "bg-accent-muted text-accent"
-          : "text-muted hover:bg-inset hover:text-fg",
+        active ? "font-semibold" : "text-fg hover:bg-inset/70",
       )}
+      style={active ? { background: `${color}22`, color } : undefined}
     >
-      <span className="flex size-[18px] shrink-0 items-center justify-center">
+      <ColorIcon color={color} className="size-7 shadow-sm">
         {icon}
-      </span>
+      </ColorIcon>
       {!collapsed && <span className="truncate">{label}</span>}
     </Link>
   );
@@ -162,13 +165,4 @@ function NavItem({
     );
   }
   return content;
-}
-
-function HomeGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="size-[18px]" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9.5 12 3l9 6.5" />
-      <path d="M5 10v10h14V10" />
-    </svg>
-  );
 }

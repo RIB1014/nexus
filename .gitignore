@@ -46,3 +46,6 @@ next-env.d.ts
 
 # user file uploads (local storage)
 /uploads/
+
+# Local dev server logs (launchd)
+logs/

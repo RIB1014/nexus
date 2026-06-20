@@ -12,7 +12,8 @@ import {
 import type { TaskDTO } from "@/types/task";
 import { SMART_LISTS, PRIORITY_META, type Priority } from "@/types/task";
 import { groupTasks, type GroupBy } from "@/lib/tasks/group";
-import { TaskSidebar, type Selection } from "./TaskSidebar";
+import { AccentScope } from "@/components/theme/AccentScope";
+import { TaskSidebar, SMART_COLORS, type Selection } from "./TaskSidebar";
 import { TaskComposer } from "./TaskComposer";
 import { TaskListView } from "./TaskListView";
 import { TaskBoardView } from "./TaskBoardView";
@@ -103,6 +104,9 @@ export function TasksModule() {
     ? SMART_LISTS.find((s) => s.id === selection.id)?.name ?? "Tasks"
     : lists.find((l) => l.id === selection.id)?.name ?? "List";
   const activeListId = selection.kind === "list" ? selection.id : null;
+  const activeColor = selection.kind === "smart"
+    ? SMART_COLORS[selection.id]
+    : lists.find((l) => l.id === selection.id)?.color ?? "#0A84FF";
   const openTask: TaskDTO | null = openId
     ? [...rawTasks, ...completedTasks].find((t) => t.id === openId) ?? null
     : null;
@@ -118,10 +122,10 @@ export function TasksModule() {
     <div className="flex flex-col gap-5 lg:flex-row lg:gap-8">
       <TaskSidebar lists={lists} selection={selection} onSelect={setSelection} />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
+      <AccentScope color={activeColor} className="flex min-w-0 flex-1 flex-col gap-4">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-display !text-2xl">{title}</h2>
+          <h2 className="text-display !text-2xl text-accent">{title}</h2>
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex rounded-md border border-line bg-panel p-0.5">
               {VIEW_MODES.map((vm) => {
@@ -271,7 +275,7 @@ export function TasksModule() {
         ) : (
           <TaskCalendarView tasks={tasks} onOpen={(t) => setOpenId(t.id)} />
         )}
-      </div>
+      </AccentScope>
 
       <TaskDetailDialog task={openTask} lists={lists} allTags={allTags} open={openId !== null} onOpenChange={(v) => !v && setOpenId(null)} />
     </div>

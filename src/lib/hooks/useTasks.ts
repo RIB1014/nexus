@@ -69,6 +69,27 @@ export function useTaskTags() {
   });
 }
 
+export function useUpdateTag() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      patch,
+    }: {
+      id: string;
+      patch: { name?: string; color?: string };
+    }) =>
+      jsonFetch<{ tag: TaskTagDTO }>(`/api/task-tags/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(patch),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.tags });
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
+}
+
 // --- Mutations -------------------------------------------------------------
 
 function useInvalidateTasks() {
@@ -193,6 +214,24 @@ export function useCreateList() {
       jsonFetch<{ list: TaskListDTO }>("/api/task-lists", {
         method: "POST",
         body: JSON.stringify(input),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.lists }),
+  });
+}
+
+export function useUpdateList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      patch,
+    }: {
+      id: string;
+      patch: { name?: string; color?: string; icon?: string | null };
+    }) =>
+      jsonFetch<{ list: TaskListDTO }>(`/api/task-lists/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(patch),
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.lists }),
   });

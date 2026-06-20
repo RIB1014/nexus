@@ -6,13 +6,17 @@ import { Check, Sun, Moon, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/useAppStore";
 import {
-  THEME_PRESETS,
+  FONT_FAMILIES,
+  fontFamilyById,
+  type FontFamilyId,
   type FontScale,
   type RadiusScale,
 } from "@/lib/theme/presets";
+import { PALETTE } from "@/lib/theme/palette";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 function Section({
   title,
@@ -26,9 +30,7 @@ function Section({
   return (
     <section className="border-b border-line py-6 first:pt-0 last:border-0">
       <h3 className="text-heading">{title}</h3>
-      {description && (
-        <p className="mt-0.5 text-small text-muted">{description}</p>
-      )}
+      {description && <p className="mt-0.5 text-small text-muted">{description}</p>}
       <div className="mt-4">{children}</div>
     </section>
   );
@@ -40,82 +42,75 @@ export default function AppearanceSettings() {
   useEffect(() => setMounted(true), []);
 
   const {
-    presetId,
+    appName,
     accentColor,
-    customAccent,
     radius,
     fontScale,
+    fontFamily,
     bgColor,
     sidebarShowLabels,
-    setPreset,
+    setAppName,
     setCustomAccent,
     setRadius,
     setFontScale,
+    setFontFamily,
     setBgColor,
     setSidebarShowLabels,
   } = useAppStore();
 
   return (
-    <div className="rounded-lg border border-line bg-panel px-5">
-      <Section
-        title="Theme preset"
-        description="One accent color sets the tone for the whole app."
-      >
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {THEME_PRESETS.map((preset) => {
-            const active = presetId === preset.id;
-            return (
-              <button
-                key={preset.id}
-                onClick={() => setPreset(preset.id, preset.accent)}
-                className={cn(
-                  "flex items-center gap-3 rounded-md border p-3 text-left transition-colors",
-                  active
-                    ? "border-accent ring-1 ring-accent"
-                    : "border-line hover:bg-inset",
-                )}
-              >
-                <span
-                  className="size-7 shrink-0 rounded-full"
-                  style={{ background: preset.accent }}
-                />
-                <span className="min-w-0">
-                  <span className="block text-small font-medium text-fg">
-                    {preset.name}
-                  </span>
-                  <span className="block truncate text-small text-muted">
-                    {preset.personality}
-                  </span>
-                </span>
-                {active && <Check className="ml-auto size-4 text-accent" />}
-              </button>
-            );
-          })}
+    <div className="app-card px-5">
+      <Section title="Branding" description="Name your workspace. This shows on the sidebar logo and headers.">
+        <div className="flex items-center gap-3">
+          <span
+            className="flex size-9 shrink-0 items-center justify-center rounded-[var(--app-radius-md)] bg-accent-gradient text-sm font-bold text-accent-contrast shadow-card"
+          >
+            {(appName.trim()[0] ?? "N").toUpperCase()}
+          </span>
+          <Input
+            value={appName}
+            onChange={(e) => setAppName(e.target.value)}
+            placeholder="Nexus"
+            maxLength={24}
+            className="w-56 text-body"
+          />
         </div>
       </Section>
 
       <Section
-        title="Custom accent"
-        description="Pick any color and Nexus rebuilds around it."
+        title="Accent color"
+        description="One color tints buttons, highlights, and the active state across the whole app."
       >
-        <div className="flex items-center gap-3">
-          <input
-            type="color"
-            aria-label="Accent color"
-            value={presetId === "custom" ? accentColor : customAccent}
-            onChange={(e) => setCustomAccent(e.target.value)}
-            className="size-10 cursor-pointer rounded-md border border-line bg-transparent"
-          />
-          <Input
-            value={presetId === "custom" ? accentColor : customAccent}
-            onChange={(e) => setCustomAccent(e.target.value)}
-            className="w-32 font-data"
-          />
+        <div className="grid grid-cols-8 gap-2.5 sm:grid-cols-[repeat(15,minmax(0,1fr))]">
+          {PALETTE.map((s) => {
+            const active = accentColor.toLowerCase() === s.hex.toLowerCase();
+            return (
+              <button
+                key={s.id}
+                title={s.name}
+                onClick={() => setCustomAccent(s.hex)}
+                className="flex aspect-square items-center justify-center rounded-full transition-transform hover:scale-110"
+                style={{ background: s.hex }}
+              >
+                {active && <Check className="size-4 text-white drop-shadow" strokeWidth={3} />}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 flex items-center gap-3">
+          <ColorPicker value={accentColor} onChange={setCustomAccent}>
+            <button className="flex items-center gap-2 rounded-md border border-line bg-canvas px-3 py-2 text-small font-medium text-fg transition-colors hover:bg-inset">
+              <span className="size-4 rounded-full" style={{ background: accentColor }} />
+              Custom…
+            </button>
+          </ColorPicker>
+          <span className="font-data text-small text-muted">{accentColor.toUpperCase()}</span>
           <span
-            className="ml-1 rounded-md px-3 py-1.5 text-small font-medium text-accent-contrast"
+            className="ml-auto rounded-md px-3 py-1.5 text-small font-semibold text-accent-contrast"
             style={{ background: "var(--color-accent)" }}
           >
-            Preview
+            Aa Preview
           </span>
         </div>
       </Section>
@@ -150,39 +145,36 @@ export default function AppearanceSettings() {
         </div>
       </Section>
 
-      <Section
-        title="Custom background"
-        description="Override the page background with your own color."
-      >
-        <div className="flex items-center gap-3">
-          <Switch
-            id="custom-bg"
-            checked={bgColor !== null}
-            onCheckedChange={(v) => setBgColor(v ? (bgColor ?? "#0b0b0e") : null)}
-          />
-          <Label htmlFor="custom-bg">Use a custom background</Label>
-          {bgColor !== null && (
-            <input
-              type="color"
-              aria-label="Background color"
-              value={bgColor}
-              onChange={(e) => setBgColor(e.target.value)}
-              className="ml-2 size-9 cursor-pointer rounded-md border border-line bg-transparent"
-            />
-          )}
+      <Section title="Font" description="Pick the typeface that feels right. System is Apple's SF on Mac.">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {FONT_FAMILIES.map((f) => {
+            const active = fontFamily === f.id;
+            return (
+              <button
+                key={f.id}
+                onClick={() => setFontFamily(f.id as FontFamilyId)}
+                className={cn(
+                  "flex flex-col items-start gap-1 rounded-md border p-3 text-left transition-colors",
+                  active ? "border-accent ring-1 ring-accent" : "border-line hover:bg-inset",
+                )}
+              >
+                <span className="text-lg font-semibold text-fg" style={{ fontFamily: f.stack }}>
+                  Ag
+                </span>
+                <span className="flex w-full items-center justify-between">
+                  <span className="text-small font-medium text-fg">{f.name}</span>
+                  {active && <Check className="size-3.5 text-accent" />}
+                </span>
+                <span className="text-micro normal-case tracking-normal text-muted">
+                  {f.description}
+                </span>
+              </button>
+            );
+          })}
         </div>
-      </Section>
-
-      <Section title="Corners" description="How rounded surfaces should feel.">
-        <SegmentedControl<RadiusScale>
-          value={radius}
-          onChange={setRadius}
-          options={[
-            { value: "sharp", label: "Sharp" },
-            { value: "default", label: "Default" },
-            { value: "rounded", label: "Rounded" },
-          ]}
-        />
+        <p className="mt-3 text-small text-muted" style={{ fontFamily: fontFamilyById(fontFamily).stack }}>
+          The quick brown fox jumps over the lazy dog — 1234567890
+        </p>
       </Section>
 
       <Section title="Text size" description="Comfort vs. density.">
@@ -197,14 +189,42 @@ export default function AppearanceSettings() {
         />
       </Section>
 
+      <Section title="Corners" description="How rounded surfaces should feel.">
+        <SegmentedControl<RadiusScale>
+          value={radius}
+          onChange={setRadius}
+          options={[
+            { value: "sharp", label: "Sharp" },
+            { value: "default", label: "Default" },
+            { value: "rounded", label: "Rounded" },
+          ]}
+        />
+      </Section>
+
+      <Section title="Custom background" description="Override the page background with your own color.">
+        <div className="flex items-center gap-3">
+          <Switch
+            id="custom-bg"
+            checked={bgColor !== null}
+            onCheckedChange={(v) => setBgColor(v ? (bgColor ?? "#0b0b0e") : null)}
+          />
+          <Label htmlFor="custom-bg">Use a custom background</Label>
+          {bgColor !== null && (
+            <ColorPicker value={bgColor} onChange={setBgColor}>
+              <button
+                className="ml-2 size-9 rounded-md border border-line"
+                style={{ background: bgColor }}
+                aria-label="Background color"
+              />
+            </ColorPicker>
+          )}
+        </div>
+      </Section>
+
       <Section title="Sidebar" description="Show labels next to module icons.">
         <div className="flex items-center justify-between">
           <Label htmlFor="sidebar-labels">Show labels</Label>
-          <Switch
-            id="sidebar-labels"
-            checked={sidebarShowLabels}
-            onCheckedChange={setSidebarShowLabels}
-          />
+          <Switch id="sidebar-labels" checked={sidebarShowLabels} onCheckedChange={setSidebarShowLabels} />
         </div>
       </Section>
     </div>
@@ -228,9 +248,7 @@ function SegmentedControl<T extends string>({
           onClick={() => onChange(opt.value)}
           className={cn(
             "rounded-sm px-3 py-1.5 text-small font-medium transition-colors",
-            value === opt.value
-              ? "bg-accent-muted text-accent"
-              : "text-muted hover:text-fg",
+            value === opt.value ? "bg-accent-muted text-accent" : "text-muted hover:text-fg",
           )}
         >
           {opt.label}

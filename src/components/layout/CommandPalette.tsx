@@ -54,7 +54,7 @@ export function CommandPalette({ enabledModuleIds }: CommandPaletteProps) {
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg">
         <Command
           loop
-          className="overflow-hidden rounded-lg border border-line bg-surface shadow-2xl shadow-black/20"
+          className="glass overflow-hidden rounded-[var(--app-radius-lg)] border border-[color:var(--glass-border)] shadow-pop"
         >
           <Command.Input
             autoFocus
