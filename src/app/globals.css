@@ -118,6 +118,15 @@
 
 html {
   font-size: 15px; /* overridden by the font-size scale setting */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* App-like mobile behavior: no horizontal pan, no rubber-band bounce. */
+html,
+body {
+  overflow-x: hidden;
+  overscroll-behavior: none;
 }
 
 body {
@@ -131,6 +140,29 @@ body {
 
 * {
   border-color: var(--color-border);
+}
+
+/* Kill the gray tap-flash on touch for a native feel. */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS auto-zooms when focusing an input whose font-size is < 16px. Force 16px
+   on small screens so the page never zooms / shifts when you tap a field. */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Safe-area helpers for notch / home-indicator (viewport-fit=cover). */
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 ::selection {

@@ -39,7 +39,7 @@ export function TopBar({ user }: TopBarProps) {
 
   return (
     <header
-      className="glass sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b px-4 md:px-6"
+      className="glass pt-safe sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b px-4 md:px-6"
       style={{ borderColor: "var(--glass-border)" }}
     >
       <h1 className="truncate text-[1.35rem] font-bold tracking-tight">{title}</h1>
