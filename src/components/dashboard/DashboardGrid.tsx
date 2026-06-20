@@ -30,6 +30,8 @@ import {
 import type { DashboardData } from "@/lib/data/dashboard";
 import { widgetFor } from "./widgets";
 import { getModule } from "@/lib/modules/registry";
+import { moduleColor } from "@/lib/modules/colors";
+import { ColorIcon } from "@/components/ui/color-picker";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -104,9 +106,10 @@ export function DashboardGrid({ initialWidgets, enabledModuleIds, data }: Props)
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <p className="text-small text-muted">
-          Drag to rearrange. Pin the modules you check most.
-        </p>
+        <div>
+          <h3 className="group-title !pb-0">Overview</h3>
+          <p className="mt-0.5 text-small text-muted">Drag to rearrange · pin what you check most.</p>
+        </div>
         {addable.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -134,7 +137,7 @@ export function DashboardGrid({ initialWidgets, enabledModuleIds, data }: Props)
         <EmptyState
           icon={<LayoutGrid />}
           title="Your dashboard is a blank canvas"
-          description="Pin a widget to see what matters at a glance the moment you open Nexus."
+          description="Pin a widget to see what matters at a glance the moment you open Orbit."
           action={
             addable.length > 0 ? (
               <DropdownMenu>
@@ -244,16 +247,17 @@ function WidgetFrame({
   const meta = widgetFor(widget.moduleId);
   const Icon = meta.icon;
   const Body = meta.Component;
+  const color = moduleColor(widget.moduleId);
 
   return (
     <div
       ref={dragRef}
-      style={dragStyle}
-      className={`flex min-h-[200px] flex-col rounded-lg border border-line bg-panel ${
-        dragging ? "z-10 opacity-80 shadow-lg" : ""
+      style={{ ...dragStyle, borderTopColor: color, borderTopWidth: 2 }}
+      className={`app-card flex min-h-[200px] flex-col ${
+        dragging ? "z-10 opacity-80 shadow-pop" : ""
       }`}
     >
-      <div className="flex items-center gap-2 border-b border-line px-3 py-2.5">
+      <div className="flex items-center gap-2.5 border-b border-line px-3 py-2.5">
         <button
           {...handleProps}
           className="cursor-grab text-faint hover:text-muted active:cursor-grabbing"
@@ -261,7 +265,9 @@ function WidgetFrame({
         >
           <GripVertical className="size-4" />
         </button>
-        <Icon className="size-4 text-muted" />
+        <ColorIcon color={color} className="size-7 [&_svg]:size-4">
+          <Icon />
+        </ColorIcon>
         <h3 className="flex-1 text-small font-semibold text-fg">{meta.title}</h3>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Sparkles, ArrowRight, ArrowLeft } from "lucide-react";
+import { Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrandMark } from "@/components/layout/BrandMark";
 import { Button } from "@/components/ui/button";
 import {
   IDENTITY_TAGS,
@@ -85,11 +86,9 @@ export function OnboardingWizard({ name }: { name: string | null }) {
     <div className="flex min-h-screen flex-col bg-canvas">
       {/* Header / progress */}
       <header className="flex items-center justify-between px-6 py-5">
-        <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-md bg-accent-gradient text-accent-contrast">
-            <Sparkles className="size-4" />
-          </div>
-          <span className="text-heading">Nexus</span>
+        <div className="flex items-center gap-2.5">
+          <BrandMark />
+          <span className="text-[1.25rem] font-semibold tracking-[-0.02em]">Orbit</span>
         </div>
         <div className="flex items-center gap-2">
           {STEPS.map((_, i) => (
@@ -289,7 +288,7 @@ export function OnboardingWizard({ name }: { name: string | null }) {
                 Skip for now
               </Button>
               <Button onClick={finish} disabled={submitting || !canContinue}>
-                {submitting ? "Setting up…" : "Enter Nexus"}
+                {submitting ? "Setting up…" : "Enter Orbit"}
               </Button>
             </div>
           )}

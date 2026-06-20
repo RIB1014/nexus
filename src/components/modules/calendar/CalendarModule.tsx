@@ -118,7 +118,7 @@ export function CalendarModule() {
 
   return (
     <div className="flex flex-col gap-5 lg:flex-row lg:gap-7">
-      <CalendarSidebar cursor={cursor} onPickDate={setCursor} calendars={calendars} />
+      <CalendarSidebar cursor={cursor} onPickDate={setCursor} calendars={calendars} onCreateEvent={() => openCreate(new Date(new Date().setMinutes(0)))} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         {/* Header */}

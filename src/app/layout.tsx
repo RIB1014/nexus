@@ -26,7 +26,7 @@ const serif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "Nexus",
+  title: "Orbit",
   description:
     "A modular productivity platform — build up exactly the tools you need.",
 };

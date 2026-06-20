@@ -10,7 +10,7 @@ export default function SettingsLayout({
       <header>
         <h2 className="text-display !text-2xl">Settings</h2>
         <p className="mt-1 text-body text-muted">
-          Tune Nexus to fit exactly how you work.
+          Tune Orbit to fit exactly how you work.
         </p>
       </header>
 

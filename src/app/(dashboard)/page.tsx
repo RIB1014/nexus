@@ -5,6 +5,7 @@ import { getEnabledModuleIds } from "@/lib/data/user";
 import { getDashboardData } from "@/lib/data/dashboard";
 import { Greeting } from "@/components/dashboard/Greeting";
 import { DashboardGrid } from "@/components/dashboard/DashboardGrid";
+import { ModuleShortcuts } from "@/components/dashboard/ModuleShortcuts";
 import { WIDGETS } from "@/components/dashboard/widgets";
 
 interface StoredWidget {
@@ -40,8 +41,9 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-7">
       <Greeting name={user?.name ?? null} />
+      <ModuleShortcuts enabledModuleIds={enabledModuleIds} />
       <DashboardGrid
         initialWidgets={widgets}
         enabledModuleIds={enabledModuleIds}

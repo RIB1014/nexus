@@ -12,7 +12,8 @@ import {
   type ThemePresetId,
 } from "@/lib/theme/presets";
 
-export const DEFAULT_APP_NAME = "Nexus";
+export const DEFAULT_APP_NAME = "Orbit";
+const LEGACY_APP_NAME = "Nexus";
 
 interface AppState {
   // Branding
@@ -72,6 +73,18 @@ export const useAppStore = create<AppState>()(
       setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
       setSidebarShowLabels: (sidebarShowLabels) => set({ sidebarShowLabels }),
     }),
-    { name: "nexus-appearance" },
+    {
+      name: "nexus-appearance",
+      version: 1,
+      // Bump anyone still on the old default name to the new brand, without
+      // clobbering a name they chose themselves.
+      migrate: (persisted: unknown, version: number) => {
+        const state = persisted as Partial<AppState> | undefined;
+        if (state && version < 1 && (!state.appName || state.appName === LEGACY_APP_NAME)) {
+          state.appName = DEFAULT_APP_NAME;
+        }
+        return state as AppState;
+      },
+    },
   ),
 );

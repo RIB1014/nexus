@@ -56,11 +56,11 @@ export function Greeting({ name }: { name: string | null }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h2 className="text-display !text-3xl">
+        <h2 className="text-display !text-[2.4rem] !leading-[1.05]">
           {greetingFor(now.getHours())}
           {firstName ? `, ${firstName}` : ""}
         </h2>
-        <p className="mt-1 font-data text-small text-muted">
+        <p className="mt-1.5 text-body text-muted">
           {now.toLocaleDateString(undefined, {
             weekday: "long",
             month: "long",
@@ -75,9 +75,9 @@ export function Greeting({ name }: { name: string | null }) {
       </div>
 
       {weather && (
-        <div className="flex items-center gap-2 rounded-md border border-line bg-panel px-3 py-1.5 text-small text-muted">
-          <Cloud className="size-4" />
-          <span className="font-data text-fg">{weather.temp}°</span>
+        <div className="app-card flex items-center gap-2 px-3.5 py-2 text-small text-muted">
+          <Cloud className="size-4 text-accent" />
+          <span className="font-data text-base font-semibold text-fg">{weather.temp}°</span>
         </div>
       )}
     </div>

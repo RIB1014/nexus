@@ -5,23 +5,25 @@ import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval,
   isSameMonth, isSameDay, addMonths, format,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Plus, Check, Trash2, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Check, Trash2, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  useCalendars, useCreateCalendar, useUpdateCalendar, useDeleteCalendar, type EventCalendarDTO,
+  useCreateCalendar, useUpdateCalendar, useDeleteCalendar, type EventCalendarDTO,
 } from "@/lib/hooks/useCalendars";
 import { useCalendarPrefs } from "@/store/useCalendarPrefs";
 import { ColorPicker } from "@/components/ui/color-picker";
-import { PALETTE_HEXES } from "@/lib/theme/palette";
+import { PALETTE, PALETTE_HEXES } from "@/lib/theme/palette";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 const CAL_COLORS = PALETTE_HEXES;
 
 export function CalendarSidebar({
-  cursor, onPickDate, calendars,
+  cursor, onPickDate, calendars, onCreateEvent,
 }: {
   cursor: Date;
   onPickDate: (d: Date) => void;
   calendars: EventCalendarDTO[];
+  onCreateEvent?: () => void;
 }) {
   const { weekStartsOn } = useCalendarPrefs();
   const create = useCreateCalendar();
@@ -40,13 +42,23 @@ export function CalendarSidebar({
 
   return (
     <aside className="flex w-full shrink-0 flex-col gap-5 lg:w-60">
+      {/* Google-style Create button */}
+      {onCreateEvent && (
+        <button
+          onClick={onCreateEvent}
+          className="flex w-fit items-center gap-2.5 rounded-full bg-panel py-2.5 pl-3.5 pr-5 text-small font-medium text-fg shadow-card transition-shadow hover:shadow-pop"
+        >
+          <Plus className="size-4 text-accent" /> Create
+        </button>
+      )}
+
       {/* Mini month */}
       <div>
         <div className="mb-1 flex items-center justify-between">
           <span className="text-small font-semibold text-fg">{format(miniCursor, "MMMM yyyy")}</span>
           <div className="flex">
-            <button onClick={() => setMiniCursor((c) => addMonths(c, -1))} className="rounded p-1 text-muted hover:bg-inset"><ChevronLeft className="size-3.5" /></button>
-            <button onClick={() => setMiniCursor((c) => addMonths(c, 1))} className="rounded p-1 text-muted hover:bg-inset"><ChevronRight className="size-3.5" /></button>
+            <button onClick={() => setMiniCursor((c) => addMonths(c, -1))} className="rounded-full p-1 text-muted hover:bg-inset"><ChevronLeft className="size-3.5" /></button>
+            <button onClick={() => setMiniCursor((c) => addMonths(c, 1))} className="rounded-full p-1 text-muted hover:bg-inset"><ChevronRight className="size-3.5" /></button>
           </div>
         </div>
         <div className="grid grid-cols-7">
@@ -69,8 +81,8 @@ export function CalendarSidebar({
       {/* My calendars */}
       <div>
         <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-micro text-faint">My calendars</span>
-          <button onClick={() => setAdding((v) => !v)} className="rounded p-0.5 text-faint hover:bg-inset hover:text-fg" aria-label="Add calendar"><Plus className="size-3.5" /></button>
+          <span className="group-title !p-0">My calendars</span>
+          <button onClick={() => setAdding((v) => !v)} className="rounded-full p-0.5 text-faint hover:bg-inset hover:text-fg" aria-label="Add calendar"><Plus className="size-3.5" /></button>
         </div>
 
         {adding && (
@@ -107,16 +119,20 @@ function CalendarRow({
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(cal.name);
-  return (
-    <div className="group flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-inset/60">
-      {/* color (click to recolor) */}
-      <ColorPicker value={cal.color} onChange={onColor}>
-        <button className="relative flex size-4 items-center justify-center rounded-[5px] transition-transform hover:scale-110" style={{ background: cal.visible ? cal.color : "transparent", border: `1.5px solid ${cal.color}` }} aria-label="Calendar color">
-          {cal.visible && <Check className="size-3 text-white" />}
-        </button>
-      </ColorPicker>
 
-      <button onClick={onToggle} className="min-w-0 flex-1 text-left" title="Toggle visibility">
+  return (
+    <div className="group flex items-center gap-2.5 rounded-md px-1.5 py-1 hover:bg-inset/60">
+      {/* Colored checkbox toggles visibility (Google style). */}
+      <button
+        onClick={onToggle}
+        className="flex size-[18px] shrink-0 items-center justify-center rounded-[5px] transition-transform hover:scale-105"
+        style={{ background: cal.visible ? cal.color : "transparent", border: `1.5px solid ${cal.color}` }}
+        aria-label={cal.visible ? "Hide calendar" : "Show calendar"}
+      >
+        {cal.visible && <Check className="size-3 text-white" strokeWidth={3} />}
+      </button>
+
+      <button onClick={onToggle} className="min-w-0 flex-1 text-left">
         {editing ? (
           <input autoFocus value={name} onChange={(e) => setName(e.target.value)}
             onClick={(e) => e.stopPropagation()}
@@ -124,12 +140,38 @@ function CalendarRow({
             onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
             className="w-full bg-transparent text-small text-fg outline-none" />
         ) : (
-          <span className={cn("truncate text-small", cal.visible ? "text-fg" : "text-faint line-through")}>{cal.name}</span>
+          <span className={cn("truncate text-small", cal.visible ? "text-fg" : "text-faint")}>{cal.name}</span>
         )}
       </button>
 
-      <button onClick={() => setEditing(true)} className="text-faint opacity-0 transition-opacity hover:text-fg group-hover:opacity-100" aria-label="Rename"><Pencil className="size-3" /></button>
-      <button onClick={onDelete} className="text-faint opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100" aria-label="Delete"><Trash2 className="size-3" /></button>
+      {/* Overflow menu: color palette + rename + delete (discoverable). */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <button className="rounded p-1 text-faint opacity-0 transition-opacity hover:bg-line hover:text-fg group-hover:opacity-100" aria-label="Calendar options">
+            <MoreHorizontal className="size-4" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-56 p-2">
+          <p className="px-1 pb-1.5 text-micro text-faint">Color</p>
+          <div className="grid grid-cols-6 gap-1.5">
+            {PALETTE.map((s) => (
+              <button key={s.id} title={s.name} onClick={() => onColor(s.hex)}
+                className="flex aspect-square items-center justify-center rounded-full transition-transform hover:scale-110" style={{ background: s.hex }}>
+                {cal.color.toLowerCase() === s.hex.toLowerCase() && <Check className="size-3.5 text-white drop-shadow" strokeWidth={3} />}
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 flex items-center gap-2 border-t border-line pt-2">
+            <ColorPicker value={cal.color} onChange={onColor} align="start">
+              <button className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-small text-muted hover:bg-inset hover:text-fg">
+                <span className="size-3.5 rounded-full" style={{ background: cal.color }} /> Custom…
+              </button>
+            </ColorPicker>
+            <button onClick={() => setEditing(true)} className="ml-auto rounded-md px-1.5 py-1 text-small text-muted hover:bg-inset hover:text-fg">Rename</button>
+            <button onClick={onDelete} className="rounded-md p-1 text-faint hover:bg-red-500/10 hover:text-red-500" aria-label="Delete calendar"><Trash2 className="size-3.5" /></button>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

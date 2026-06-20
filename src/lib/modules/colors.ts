@@ -4,7 +4,7 @@
 
 export const MODULE_COLORS: Record<string, string> = {
   tasks: "#0A84FF", // blue
-  calendar: "#FF3B30", // red
+  calendar: "#1A73E8", // Google blue (calendar chrome; each calendar keeps its own color)
   notes: "#FFB300", // amber
   academic: "#5E5CE6", // indigo
   email: "#32ADE6", // cyan

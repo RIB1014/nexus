@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { BrandMark } from "@/components/layout/BrandMark";
 
 function Section({
   title,
@@ -62,11 +63,7 @@ export default function AppearanceSettings() {
     <div className="app-card px-5">
       <Section title="Branding" description="Name your workspace. This shows on the sidebar logo and headers.">
         <div className="flex items-center gap-3">
-          <span
-            className="flex size-9 shrink-0 items-center justify-center rounded-[var(--app-radius-md)] bg-accent-gradient text-sm font-bold text-accent-contrast shadow-card"
-          >
-            {(appName.trim()[0] ?? "N").toUpperCase()}
-          </span>
+          <BrandMark className="size-9" />
           <Input
             value={appName}
             onChange={(e) => setAppName(e.target.value)}

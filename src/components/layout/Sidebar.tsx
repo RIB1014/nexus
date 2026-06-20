@@ -8,6 +8,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { MODULE_MAP } from "@/lib/modules/registry";
 import { moduleColor } from "@/lib/modules/colors";
 import { ColorIcon } from "@/components/ui/color-picker";
+import { BrandMark } from "./BrandMark";
 import {
   Tooltip,
   TooltipContent,
@@ -40,15 +41,11 @@ export function Sidebar({ enabledModuleIds }: SidebarProps) {
     >
       {/* Brand */}
       <div className="flex h-14 items-center gap-2.5 px-3.5">
-        <Link
-          href="/"
-          aria-label={appName}
-          className="flex size-8 shrink-0 items-center justify-center rounded-[var(--app-radius-md)] bg-accent-gradient text-sm font-bold text-accent-contrast shadow-card transition-transform hover:scale-105"
-        >
-          {(appName.trim()[0] ?? "N").toUpperCase()}
+        <Link href="/" aria-label={appName} className="transition-transform hover:scale-105">
+          <BrandMark />
         </Link>
         {!isCollapsed && (
-          <span className="truncate text-[1.05rem] font-bold tracking-tight">{appName}</span>
+          <span className="truncate text-[1.15rem] font-semibold tracking-[-0.02em]">{appName}</span>
         )}
       </div>
 
